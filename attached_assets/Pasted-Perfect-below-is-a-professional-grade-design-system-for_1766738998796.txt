@@ -1,0 +1,220 @@
+Perfect — below is a professional‑grade design system for CampusConnect, aligned exactly with the student‑first, AI‑powered UX we defined earlier. This is the level guides, judges, and frontend devs love because it’s clear, intentional, and implementable.
+
+🎨 COLOR PALETTE (Student‑Centric, Calm, Modern)
+🎯 Design Philosophy
+Calm & trust‑building (for academic + mental well‑being)
+
+Motivating, not overwhelming
+
+Works well for long usage sessions
+
+Supports AI insights without anxiety
+
+🌈 Primary Colors
+Purpose	Color	Hex
+Primary Brand	Deep Indigo	#4F46E5
+Primary Hover	Indigo Dark	#4338CA
+Accent / Highlights	Soft Cyan	#22D3EE
+Used for:
+
+Primary buttons
+
+Active tabs
+
+Progress highlights
+
+AI Mentor elements
+
+🌿 Secondary / Support Colors
+Purpose	Color	Hex
+Success / Growth	Emerald Green	#10B981
+Warning / Attention	Amber	#F59E0B
+Error / Stress Alert	Rose Red	#EF4444
+Calm / Neutral Accent	Soft Teal	#14B8A6
+Used for:
+
+Mood indicators
+
+Performance feedback
+
+Notifications
+
+Stress & sentiment visuals
+
+🧊 Neutral / Background Colors
+Purpose	Color	Hex
+Main Background	Off‑White	#F9FAFB
+Card Background	Pure White	#FFFFFF
+Border / Divider	Light Gray	#E5E7EB
+Text Secondary	Cool Gray	#6B7280
+Text Primary	Charcoal	#111827
+🌙 Dark Mode (Optional but Recommended)
+Purpose	Color	Hex
+Background	Charcoal	#0F172A
+Cards	Dark Slate	#1E293B
+Primary Accent	Indigo	#6366F1
+Text	Soft White	#E5E7EB
+✍️ TYPOGRAPHY SYSTEM (Readable + Premium)
+🎯 Typography Goals
+Extremely readable for long study sessions
+
+Modern & clean
+
+Feels like Notion + Google + Apple
+
+🔤 Font Stack
+Primary Font (UI + Body)
+Inter
+
+Clean
+
+Student‑friendly
+
+Perfect for dashboards
+
+Fallback:
+
+font-family: "Inter", system-ui, -apple-system, sans-serif;
+Secondary Font (Headings / AI Mentor / Highlights)
+Poppins (optional)
+
+Friendly
+
+Motivational
+
+Works well for AI tone
+
+📐 Font Sizes & Usage
+Element	Size	Weight
+Page Title	28–32px	SemiBold
+Section Heading	20–24px	Medium
+Card Title	16–18px	Medium
+Body Text	14–16px	Regular
+Labels	12–13px	Medium
+Helper / AI Text	13–14px	Regular
+📐 WIREFRAME DESCRIPTIONS (STUDENT FLOW)
+Below are clear, text‑based wireframes that Replit or a frontend dev can directly implement.
+
+🏠 1. STUDENT HOME DASHBOARD (Landing Screen)
+Layout
+------------------------------------------------
+Top Bar: Logo | Search | Notifications | Profile
+------------------------------------------------
+Sidebar:
+• Dashboard
+• Communication Hub
+• My Profile
+• AI Mentor
+• Learning
+• Clubs
+• Career
+------------------------------------------------
+Main Content:
+[ Welcome Card + Daily Motivation ]
+
+[ Announcements Preview ]   [ Today’s Tasks ]
+
+[ Academic Progress ]       [ Mood / Energy ]
+
+[ AI Mentor Suggestion Card ]
+------------------------------------------------
+UX Notes
+First thing student sees: clarity + calm
+
+No clutter
+
+Focus on “What should I do today?”
+
+📢 2. COMMUNICATION HUB WIREFRAME
+Tabs
+[ Announcements ] [ Feed ] [ Chats ] [ Notifications ]
+📢 Announcements View
+Filters: Year | Dept | Category | Priority | Date
+
+----------------------------------------
+| 📌 Exam Schedule Update              |
+| Tag: Academic | Year: 2nd           |
+| Posted by: Admin | Time             |
+----------------------------------------
+| 🎯 Placement Workshop               |
+| Tag: Placement | Bookmark ⭐         |
+----------------------------------------
+UX Touches
+Sticky important announcements
+
+Clear color‑coded tags
+
+Bookmark animation
+
+📸 Feed View (Instagram‑like)
+[ Club Event Image ]
+❤️  💬  📌
+Caption
+Poll / Event Highlights
+👤 3. STUDENT PROFILE (DIGITAL JOURNAL CORE)
+Layout
+Profile Header:
+Photo | Name | Branch | Year | Mood Indicator
+
+------------------------------------------------
+Tabs:
+[ Academic ] [ Personal Growth ] [ Journal ]
+------------------------------------------------
+📊 Academic Tab
+Subjects Progress Bars
+Attendance Ring
+CGPA Trend Graph
+Exam Readiness Meter
+🌱 Personal / Professional Growth Tab
+Skills Radar Chart
+Soft Skill Progress
+Clubs Timeline
+Certifications
+📓 Digital Journal Tab
+Mood Slider 😊 😐 😟
+Study Hours Input
+Reflection Text Area
+AI Insight Summary
+Feels like Notion, not a form.
+
+🤖 4. AI MENTOR WIREFRAME
+Floating Button
+Bottom‑right → opens chat panel
+
+AI Mentor:
+"Hey, you studied less this week.
+Want a lighter plan?"
+
+[ View Plan ] [ Talk ] [ Ignore ]
+UX Rules
+Supportive
+
+Optional
+
+Explains “why” behind suggestions
+
+📱 MOBILE WIREFRAME (VERY IMPORTANT)
+Bottom Navigation
+🏠  📢  🤖  👤  🔔
+Thumb‑friendly
+
+One‑hand usage
+
+Quick AI access
+
+✨ MICRO‑INTERACTIONS (DESIGN MAGIC)
+Button hover → soft scale (1.02)
+
+Card hover → shadow + lift
+
+Progress complete → confetti 🎉
+
+Mood change → smooth color shift
+
+Page transition → fade + slide
+
+🧠 FINAL DESIGN FEEL
+CampusConnect should feel like:
+
+“A calm, intelligent companion that helps me grow — not a strict college portal.”
+

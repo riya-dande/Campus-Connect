@@ -1,0 +1,291 @@
+Project: CampusConnect – Student‑First AI‑Powered Campus Platform
+
+🎯 ROLE & GOAL
+You are an expert frontend engineer and UI/UX designer building a modern, student‑centric web application called CampusConnect.
+The goal is to design a high‑quality, intuitive, emotionally intelligent campus platform that feels as polished as Instagram + Notion + Google Classroom combined — but designed exclusively for college students.
+
+Focus on:
+
+Clean, modern UI
+
+Smooth UX flows
+
+Meaningful micro‑interactions
+
+Accessibility & responsiveness
+
+Emotional + productivity‑aware design
+
+🧑‍🎓 TARGET USER
+A college student (1st–4th year) who wants:
+
+One place for announcements, chats, and updates
+
+Clear visibility of academic + personal growth
+
+AI‑driven guidance without feeling overwhelming
+
+A platform that feels friendly, motivating, and smart
+
+🌐 TECH STACK (Frontend‑Focused)
+React + Vite (or Next.js if preferred)
+
+Tailwind CSS for clean, scalable styling
+
+Framer Motion for micro‑animations
+
+Zustand / Context API for state
+
+Component‑driven architecture
+
+Mobile‑first responsive design
+
+🧩 CORE STUDENT FEATURES (DESIGN + UX SPECIFICATION)
+1️⃣ COMMUNICATION HUB (Most Used Feature)
+🎯 Purpose
+A single, distraction‑free space for all college communication — better than WhatsApp groups or cluttered portals.
+
+🧠 UI STRUCTURE
+Tabs at top:
+
+Announcements
+
+Posts (Campus Feed)
+
+Chats
+
+Notifications
+
+📢 Announcement Center
+Design:
+
+Card‑based layout
+
+Color‑coded tags (Exam, Placement, Club, Holiday, Academic)
+
+Sticky “Important” announcements
+
+Clear timestamps + issuer (Admin / Faculty / CR)
+
+Filters (Left Sidebar or Dropdown):
+
+Department
+
+Year
+
+Category
+
+Priority
+
+Date
+
+Micro‑Interactions:
+
+Hover → soft elevation + glow
+
+New announcement → subtle pulse animation
+
+Bookmark icon → animated save
+
+Mark as read → smooth fade
+
+📸 Campus Feed (Instagram‑style)
+Purpose: Student engagement & campus culture
+
+UI:
+
+Vertical scroll feed
+
+Image + caption posts
+
+Polls (club voting, feedback)
+
+Event highlights
+
+Micro‑Actions:
+
+Like → heart animation
+
+Poll vote → instant bar animation
+
+Comment → slide‑up modal
+
+Save → icon morph
+
+💬 Chat Interface (Faculty + Students)
+Design:
+
+Clean WhatsApp‑style chat
+
+Separate tabs: Faculty | Groups | Peers
+
+Search chats
+
+Online indicators
+
+Micro‑UX:
+
+Typing animation
+
+Message sent → tick animation
+
+New message → soft vibration effect (visual)
+
+🔔 Notifications
+Bell icon with badge count
+
+Priority‑based stacking
+
+Swipe to dismiss
+
+Snooze notifications option
+
+2️⃣ STUDENT PROFILE: DIGITAL SELF‑DEVELOPMENT JOURNAL
+This is the heart of CampusConnect.
+
+👤 Student Profile Dashboard
+Visual Style:
+
+Calm colors
+
+Minimal cards
+
+Progress‑focused, not marks‑focused
+
+📊 Two Parallel Growth Tracks
+🧠 Academic Development
+Subject progress bars
+
+Attendance + CGPA visualization
+
+Exam readiness meter
+
+Weak vs strong topics
+
+🌱 Professional & Personal Development
+Skills radar chart
+
+Soft‑skill tracker (communication, leadership)
+
+Club participation timeline
+
+Internship / workshop log
+
+📓 Digital Journal View
+Daily / Weekly Reflections
+
+Mood slider (😊 😐 😟)
+
+Study hours
+
+Productivity score
+
+Notes / reflections
+
+UX Touch:
+
+Writing feels like Notion
+
+Autosave animation
+
+Calm focus mode
+
+3️⃣ AI‑POWERED LEARNING & MENTOR SYSTEM
+🤖 AI Mentor (Floating Assistant)
+Always accessible (bottom corner)
+
+Friendly, non‑robotic tone
+
+Uses chat + cards
+
+Capabilities:
+
+Suggest study plans
+
+Detect stress patterns
+
+Recommend skills
+
+Career guidance by year
+
+🧠 AI Features (UI Perspective)
+Sentiment Analysis → Mood graph
+
+Predictive Modeling → “Next Week Risk” indicator
+
+ML Progress Tracking → Smart nudges
+
+UX Rules:
+
+Never scary
+
+Always supportive
+
+Explain insights in simple language
+
+📈 Learning Pace & Modules
+Adaptive learning paths
+
+Visual timeline
+
+Milestone celebrations 🎉
+
+Gentle reminders instead of alerts
+
+✨ MICRO‑INTERACTIONS & DELIGHT
+Progress completion → confetti burst
+
+Achievements → badge glow
+
+Hover states everywhere
+
+Page transitions → smooth fade/slide
+
+Loading → skeleton screens (not spinners)
+
+🎨 DESIGN SYSTEM
+Soft gradients
+
+Rounded cards
+
+Large readable typography
+
+Neutral + accent colors
+
+Dark mode ready
+
+📱 RESPONSIVE UX
+Mobile first
+
+Thumb‑friendly navigation
+
+Bottom nav bar for mobile
+
+Desktop sidebar for large screens
+
+🔐 TRUST & EMOTIONAL SAFETY
+Mood data private by default
+
+Clear AI explanations
+
+User control over recommendations
+
+🧠 FINAL EXPERIENCE GOAL
+When a student opens CampusConnect, they should feel:
+
+“This understands me, supports me, and helps me grow.”
+
+🚀 OUTPUT EXPECTATION
+Generate:
+
+Complete frontend UI
+
+Clean component structure
+
+Smooth animations
+
+Placeholder AI logic hooks
+
+Dummy student data
+
+Production‑quality UI/UX
