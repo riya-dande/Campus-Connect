@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Search, Phone, Video, MoreVertical, Send, Paperclip, Smile } from "lucide-react";
+import { Search, Phone, Video, MoreVertical, Send, Paperclip, Smile, ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useStore } from "@/store";
 import { cn } from "@/lib/utils";
 
 export default function Messages() {
+  const [, setLocation] = useLocation();
   const { chats } = useStore();
   const [selectedChat, setSelectedChat] = useState(chats[0].id);
 
@@ -19,6 +21,15 @@ export default function Messages() {
       {/* Sidebar List */}
       <div className="w-full md:w-80 border-r border-border flex flex-col bg-muted/10">
         <div className="p-4 border-b border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-3 w-fit rounded-full"
+            onClick={() => window.history.length > 1 ? window.history.back() : setLocation("/hub")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search messages..." className="pl-9 bg-background border-transparent shadow-sm focus:bg-background" />

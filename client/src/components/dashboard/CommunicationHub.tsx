@@ -1,360 +1,359 @@
-import { motion } from "framer-motion";
-import { MessageSquare, Hash, Settings, Plus, Video, Phone, Mic, Radio, Users, Eye, Heart, UserCheck, Briefcase, Award, CalendarPlus, Bot } from "lucide-react";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Bell,
+  Hash,
+  Headphones,
+  ImagePlus,
+  Laugh,
+  Mic,
+  Paperclip,
+  Phone,
+  Plus,
+  Search,
+  Send,
+  Settings,
+  ShieldCheck,
+  Video,
+  Volume2,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import billboardImage from '@assets/generated_images/futuristic_digital_billboard_on_campus.png';
+import { useStore } from "@/store";
 
-const groups = [
-  { id: 1, name: "Coding Guild", icon: "💻", active: true },
-  { id: 2, name: "Design Studio", icon: "🎨", active: false },
-  { id: 3, name: "Placement Prep", icon: "💼", active: false },
+type Message = {
+  id: number;
+  user: string;
+  text: string;
+  time: string;
+  avatarSeed: string;
+  mine?: boolean;
+};
+
+const serverList = [
+  { id: "cc-main", label: "CC", color: "from-primary to-purple-600" },
+  { id: "code-lab", label: "CL", color: "from-blue-500 to-cyan-500" },
+  { id: "events", label: "EV", color: "from-orange-500 to-pink-500" },
+  { id: "placements", label: "PL", color: "from-emerald-500 to-green-600" },
+];
+
+const textChannels = ["announcements", "general", "showcase", "placements", "random"];
+const voiceChannels = ["Lounge", "Study Room", "Interview Prep"];
+
+const initialMessages: Message[] = [
+  {
+    id: 1,
+    user: "Sarah",
+    text: "Has anyone seen the latest placement drive post?",
+    time: "12:30 PM",
+    avatarSeed: "Sarah",
+  },
+  {
+    id: 2,
+    user: "Alex",
+    text: "Yes, Google and Atlassian links are in #announcements.",
+    time: "12:32 PM",
+    avatarSeed: "Alex",
+  },
+  {
+    id: 3,
+    user: "Riya",
+    text: "I can share my resume checklist here if anyone wants.",
+    time: "12:34 PM",
+    avatarSeed: "Riya",
+  },
+];
+
+const members = [
+  { name: "Prof. Smith", role: "Faculty", status: "online", seed: "ProfSmith" },
+  { name: "Sarah", role: "Moderator", status: "online", seed: "Sarah" },
+  { name: "Alex", role: "Student", status: "idle", seed: "Alex" },
+  { name: "Riya", role: "Student", status: "online", seed: "Riya" },
+  { name: "David", role: "Student", status: "offline", seed: "David" },
 ];
 
 export default function CommunicationHub() {
-  const [activeGroup, setActiveGroup] = useState(groups[0].id);
-  const [activeTab, setActiveTab] = useState("chat");
+  const { user } = useStore();
+  const [activeServer, setActiveServer] = useState(serverList[0].id);
+  const [activeTextChannel, setActiveTextChannel] = useState("general");
+  const [messageInput, setMessageInput] = useState("");
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-  const liveStreams = [
-    {
-      id: 1,
-      title: "Live: OS Study Session",
-      streamer: "Prof. Smith",
-      viewers: 45,
-      category: "Academic",
-      thumbnail: billboardImage
-    },
-    {
-      id: 2,
-      title: "Campus Tour 2026",
-      streamer: "Student Council",
-      viewers: 120,
-      category: "Campus Life",
-      thumbnail: billboardImage
-    }
-  ];
+  const onlineCount = useMemo(
+    () => members.filter((m) => m.status === "online" || m.status === "idle").length,
+    []
+  );
+
+  const sendMessage = () => {
+    const text = messageInput.trim();
+    if (!text) return;
+
+    const newMessage: Message = {
+      id: Date.now(),
+      user: user.name.split(" ")[0] || "You",
+      text,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      avatarSeed: user.name.replace(/\s+/g, ""),
+      mine: true,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setMessageInput("");
+  };
 
   return (
-    <div className="h-[600px] flex bg-card rounded-2xl overflow-hidden border border-border/50 shadow-xl">
-      {/* Sidebar - Servers List */}
-      <div className="w-16 bg-muted/30 border-r border-border/50 flex flex-col items-center py-4 gap-4">
-        {groups.map((group) => (
-          <motion.div
-            key={group.id}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setActiveGroup(group.id)}
-            className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center text-xl cursor-pointer transition-all",
-              activeGroup === group.id 
-                ? "bg-primary text-white rounded-xl" 
-                : "bg-background hover:bg-primary/10"
-            )}
-          >
-            {group.icon}
-          </motion.div>
-        ))}
-        <Button variant="outline" size="icon" className="w-12 h-12 rounded-2xl border-dashed">
-          <Plus className="w-5 h-5" />
-        </Button>
-      </div>
+    <div className="h-[690px] overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xl">
+      <div className="flex h-full">
+        <aside className="flex w-[76px] flex-col items-center gap-3 bg-slate-100 px-3 py-4">
+          {serverList.map((server) => {
+            const active = activeServer === server.id;
+            return (
+              <motion.button
+                key={server.id}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setActiveServer(server.id)}
+                className={cn(
+                  "group relative h-12 w-12 rounded-2xl transition-all",
+                  active ? "rounded-xl" : ""
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex h-full w-full items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-bold text-white transition-all",
+                    server.color,
+                    active && "rounded-xl"
+                  )}
+                >
+                  {server.label}
+                </div>
+                <span
+                  className={cn(
+                    "absolute -left-2 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-primary transition-all",
+                    active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+                  )}
+                />
+              </motion.button>
+            );
+          })}
+          <button className="mt-1 flex h-12 w-12 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white text-slate-600 hover:bg-slate-50">
+            <Plus className="h-5 w-5" />
+          </button>
+        </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <div className="px-4 pt-4">
-            <TabsList className="w-full justify-start">
-              <TabsTrigger value="chat" className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger value="voice" className="flex items-center gap-2">
-                <Mic className="w-4 h-4" />
-                Voice
-              </TabsTrigger>
-              <TabsTrigger value="live" className="flex items-center gap-2">
-                <Radio className="w-4 h-4" />
-                Live
-              </TabsTrigger>
-              <TabsTrigger value="support" className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4" />
-                Support
-              </TabsTrigger>
-            </TabsList>
+        <aside className="w-[260px] border-r border-border/70 bg-slate-50">
+          <div className="border-b border-border/70 p-4">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-slate-900">CampusConnect Hub</p>
+              <Settings className="h-4 w-4 text-slate-500" />
+            </div>
           </div>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col m-0">
-            {/* Channel List */}
-            <div className="w-48 bg-muted/10 border-r border-border/50 flex flex-col">
-              <div className="p-4 font-bold text-sm border-b border-border/50 flex justify-between items-center">
-                Channels
-                <Settings className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <ScrollArea className="flex-1 p-2">
+          <ScrollArea className="h-[calc(100%-65px)]">
+            <div className="space-y-5 p-3">
+              <div>
+                <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  Text Channels
+                </p>
                 <div className="space-y-1">
-                  {['announcements', 'general', 'showcase', 'random'].map((ch) => (
-                    <div 
-                      key={ch} 
+                  {textChannels.map((channel) => (
+                    <motion.button
+                      key={channel}
+                      whileHover={{ x: 2 }}
+                      onClick={() => setActiveTextChannel(channel)}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors",
-                        ch === 'general' ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
+                        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                        activeTextChannel === channel
+                          ? "bg-primary/15 text-primary"
+                          : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900"
                       )}
                     >
-                      <Hash className="w-4 h-4" />
-                      {ch}
-                    </div>
+                      <Hash className="h-4 w-4" />
+                      {channel}
+                    </motion.button>
                   ))}
-                </div>
-              </ScrollArea>
-            </div>
-
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-background">
-              <div className="p-4 border-b border-border/50 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Hash className="w-5 h-5 text-muted-foreground" />
-                  <span className="font-bold">general</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground">
-                    <Phone className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground">
-                    <Video className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
 
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-6">
-                  {[
-                    { user: "Sarah", text: "Has anyone seen the new Placement post?", time: "12:30 PM" },
-                    { user: "Alex", text: "Yeah, just checked it. The Google drive looks interesting!", time: "12:32 PM" },
-                    { user: "Me", text: "I'm working on my portfolio for that right now 🚀", time: "12:35 PM" },
-                  ].map((msg, i) => (
-                    <div key={i} className="flex gap-3 group">
-                      <Avatar className="w-10 h-10 ring-2 ring-background">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.user}`} />
-                        <AvatarFallback>{msg.user[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-sm">{msg.user}</span>
-                          <span className="text-[10px] text-muted-foreground">{msg.time}</span>
-                        </div>
-                        <p className="text-sm leading-relaxed">{msg.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-
-              <div className="p-4">
-                <div className="bg-muted/30 p-2 rounded-xl flex items-center gap-2 border border-border/50">
-                  <Plus className="w-5 h-5 text-muted-foreground ml-2" />
-                  <input 
-                    className="flex-1 bg-transparent border-none text-sm focus:ring-0 p-2" 
-                    placeholder="Message #general"
-                  />
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="voice" className="flex-1 m-0">
-            <div className="flex-1 flex flex-col bg-background">
-              <div className="p-4 border-b border-border/50">
-                <h3 className="font-bold flex items-center gap-2">
-                  <Mic className="w-5 h-5" />
+              <div>
+                <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                   Voice Channels
-                </h3>
+                </p>
+                <div className="space-y-1">
+                  {voiceChannels.map((channel) => (
+                    <button
+                      key={channel}
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-200/70 hover:text-slate-900"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                      {channel}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-3">
-                  {[
-                    { name: "General", users: 5, muted: false },
-                    { name: "Study Session", users: 12, muted: false },
-                    { name: "Gaming", users: 8, muted: true }
-                  ].map((channel, index) => (
-                    <Card key={index} className="p-4 hover:bg-muted/50 cursor-pointer transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-3 h-3 rounded-full",
-                            channel.muted ? "bg-red-500" : "bg-green-500"
-                          )} />
+            </div>
+          </ScrollArea>
+        </aside>
+
+        <main className="flex min-w-0 flex-1 flex-col bg-white">
+          <header className="flex h-14 items-center justify-between border-b border-border/70 px-4">
+            <div className="flex items-center gap-2">
+              <Hash className="h-5 w-5 text-slate-400" />
+              <p className="font-semibold text-slate-900">{activeTextChannel}</p>
+              <span className="ml-2 text-sm text-slate-500">Student collaboration and updates</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                <Video className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                <Bell className="h-4 w-4" />
+              </Button>
+              <div className="ml-1 flex h-8 items-center rounded-md border border-border/70 bg-slate-50 px-2.5">
+                <Search className="h-4 w-4 text-slate-500" />
+                <span className="ml-2 text-xs text-slate-500">Search</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="grid min-h-0 flex-1 grid-cols-[1fr_240px]">
+            <section className="flex min-h-0 flex-col">
+              <ScrollArea className="min-h-0 flex-1">
+                <div className="space-y-0.5 px-4 py-4">
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.15) }}
+                        className="rounded-md px-2 py-2 hover:bg-slate-100/80"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.avatarSeed}`} />
+                            <AvatarFallback>{msg.user[0]}</AvatarFallback>
+                          </Avatar>
                           <div>
-                            <p className="font-medium">{channel.name}</p>
-                            <p className="text-sm text-muted-foreground">{channel.users} users</p>
+                            <div className="flex items-center gap-2">
+                              <span className={cn("text-sm font-semibold text-slate-900", msg.mine && "text-primary")}>
+                                {msg.user}
+                              </span>
+                              <span className="text-xs text-slate-500">{msg.time}</span>
+                              {msg.mine && (
+                                <Badge className="h-5 rounded-full border-none bg-primary/15 px-2 text-[10px] text-primary">
+                                  You
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="mt-0.5 text-sm leading-relaxed text-slate-700">{msg.text}</p>
                           </div>
                         </div>
-                        <Button size="sm">
-                          {channel.muted ? "Unmute" : "Join"}
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               </ScrollArea>
-            </div>
-          </TabsContent>
 
-          <TabsContent value="live" className="flex-1 m-0">
-            <div className="flex-1 flex flex-col bg-background">
-              <div className="p-4 border-b border-border/50 flex justify-between items-center">
-                <h3 className="font-bold flex items-center gap-2">
-                  <Radio className="w-5 h-5" />
-                  Live Streams
-                </h3>
-                <Button>
-                  <Video className="w-4 h-4 mr-2" />
-                  Go Live
-                </Button>
+              <div className="p-4 pt-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-slate-50 px-3 py-2.5">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <input
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") sendMessage();
+                    }}
+                    placeholder={`Message #${activeTextChannel}`}
+                    className="h-9 flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none"
+                  />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                    <ImagePlus className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                    <Laugh className="h-4 w-4" />
+                  </Button>
+                  <Button onClick={sendMessage} size="icon" className="h-8 w-8 rounded-full">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {liveStreams.map((stream) => (
-                    <Card key={stream.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                      <div className="aspect-video bg-muted relative">
-                        <img
-                          src={stream.thumbnail}
-                          alt={stream.title}
-                          className="w-full h-full object-cover"
+            </section>
+
+            <aside className="border-l border-border/70 bg-slate-50">
+              <div className="border-b border-border/70 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">Members</p>
+                <p className="text-xs text-slate-500">{onlineCount} online</p>
+              </div>
+              <ScrollArea className="h-[calc(100%-58px)]">
+                <div className="space-y-1 p-2">
+                  {members.map((member) => (
+                    <div
+                      key={member.name}
+                      className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-slate-100"
+                    >
+                      <div className="relative">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.seed}`} />
+                          <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <span
+                          className={cn(
+                            "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-50",
+                            member.status === "online" && "bg-emerald-500",
+                            member.status === "idle" && "bg-amber-400",
+                            member.status === "offline" && "bg-slate-500"
+                          )}
                         />
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-red-500 text-white border-none">
-                            <Radio className="w-3 h-3 mr-1" />
-                            LIVE
-                          </Badge>
-                        </div>
-                        <div className="absolute bottom-2 left-2 flex items-center gap-2 text-white text-sm">
-                          <Eye className="w-4 h-4" />
-                          {stream.viewers}
-                        </div>
                       </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold mb-1">{stream.title}</h4>
-                        <p className="text-sm text-muted-foreground mb-3">{stream.streamer}</p>
-                        <div className="flex justify-between items-center">
-                          <Badge variant="outline">{stream.category}</Badge>
-                          <Button size="sm">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Watch
-                          </Button>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">{member.name}</p>
+                        <p className="truncate text-[11px] text-slate-500">{member.role}</p>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               </ScrollArea>
-            </div>
-          </TabsContent>
+            </aside>
+          </div>
 
-          <TabsContent value="support" className="flex-1 m-0">
-            <div className="flex-1 bg-background p-4 md:p-5 space-y-4 overflow-auto">
-              <Card className="p-4 border border-border/50 bg-primary/5">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-primary/15 text-primary">
-                    <Bot className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">AI Student Assistant</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Ask for attendance recovery plans, exam strategy, and internship profile feedback.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <Button size="sm" className="rounded-full">Plan Attendance</Button>
-                      <Button size="sm" variant="outline" className="rounded-full">Draft Leave Mail</Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="p-4 border border-border/50">
-                  <h3 className="font-semibold flex items-center gap-2 mb-3">
-                    <UserCheck className="w-4 h-4 text-primary" />
-                    Student Counsellor
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="p-3 rounded-xl bg-muted/30">
-                      <p className="font-medium">Dr. Venkata Lalita Parameswari Dantu</p>
-                      <p className="text-muted-foreground">Semester 3-2 • Academic Counselling</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted/30">
-                      <p className="font-medium">Dr. Sharada Adepu</p>
-                      <p className="text-muted-foreground">Semester 3-1 • Career Counselling</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-4 border border-border/50">
-                  <h3 className="font-semibold flex items-center gap-2 mb-3">
-                    <CalendarPlus className="w-4 h-4 text-primary" />
-                    Leave Support
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="p-3 rounded-xl bg-muted/30 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Medical Leave</p>
-                        <p className="text-muted-foreground">Draft pending faculty approval</p>
-                      </div>
-                      <Badge variant="outline">Pending</Badge>
-                    </div>
-                    <Button className="w-full rounded-xl mt-1">Apply New Leave</Button>
-                  </div>
-                </Card>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="p-4 border border-border/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <Award className="w-4 h-4 text-primary" />
-                      Student Achievements
-                    </h3>
-                    <Button size="sm" variant="outline" className="rounded-full">Add New</Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
-                      <p className="font-medium">Hackathon Finalist</p>
-                      <p className="text-muted-foreground">Smart Campus Hackathon • Jan 2026</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
-                      <p className="font-medium">Paper Presentation</p>
-                      <p className="text-muted-foreground">AI and Vision Symposium • Dec 2025</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-4 border border-border/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-primary" />
-                      Student Internships
-                    </h3>
-                    <Button size="sm" variant="outline" className="rounded-full">Add New</Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
-                      <p className="font-medium">Frontend Intern • CampusConnect Labs</p>
-                      <p className="text-muted-foreground">May 2026 - Jul 2026</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
-                      <p className="font-medium">No other internships yet</p>
-                      <p className="text-muted-foreground">Use AI mentor to improve resume and apply.</p>
-                    </div>
-                  </div>
-                </Card>
+          <footer className="flex h-14 items-center justify-between border-t border-border/70 bg-slate-100 px-4">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.avatar} />
+                <AvatarFallback>{user.name[0]}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-xs font-semibold text-slate-900">{user.name}</p>
+                <p className="text-[10px] text-emerald-600">Online</p>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                <Mic className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                <Headphones className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-200 hover:text-slate-800">
+                <ShieldCheck className="h-4 w-4" />
+              </Button>
+            </div>
+          </footer>
+        </main>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Shell from "@/components/layout/Shell";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
 import Hub from "@/pages/Hub";
 import CampusZones from "@/pages/CampusZones";
@@ -35,6 +36,7 @@ function Router() {
       
       {/* Login Page - Public */}
       <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       
       {/* Protected routes - redirect to login if not authenticated */}
       <Route path="/dashboard">
