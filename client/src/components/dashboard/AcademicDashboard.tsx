@@ -9,9 +9,25 @@ import {
   Download, Eye, MessageSquare, Video
 } from "lucide-react";
 import { useStore } from "@/store";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+const TASK_CATEGORIES = ["Academic", "Club", "Career"];
+
+// Fix: Add Task type for tasks state
+interface Task {
+  id: string;
+  title: string;
+  category: string;
+  completed: boolean;
+}
 
 export default function AcademicDashboard() {
   const { user } = useStore();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [taskInput, setTaskInput] = useState("");
+  const [category, setCategory] = useState(TASK_CATEGORIES[0]);
+  const [loading, setLoading] = useState(false);
 
   const grades = [
     { subject: "Operating Systems", grade: "A-", progress: 85, attendance: 92 },
@@ -31,6 +47,50 @@ export default function AcademicDashboard() {
     { time: "11:00 AM", subject: "Data Structures Lab", room: "Lab-203", type: "lab" },
     { time: "2:00 PM", subject: "Algorithms", room: "CS-102", type: "lecture" },
   ];
+
+  // Load tasks from Supabase
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("id, title, category, completed")
+        .order("created_at", { ascending: false });
+      if (!error && data) setTasks((data as Task[]) || []);
+      setLoading(false);
+    };
+    fetchTasks();
+  }, []);
+
+  // Add new task
+  const handleAddTask = async () => {
+    if (!taskInput.trim()) return;
+    await supabase
+      .from("tasks")
+      .insert([{ title: taskInput, category, completed: false }]);
+    setTaskInput("");
+    setCategory(TASK_CATEGORIES[0]);
+    // Reload tasks
+    const { data } = await supabase
+      .from("tasks")
+      .select("id, title, category, completed")
+      .order("created_at", { ascending: false });
+    setTasks((data as Task[]) || []);
+  };
+
+  // Toggle complete
+  const handleToggleTask = async (id: string, completed: boolean) => {
+    await supabase
+      .from("tasks")
+      .update({ completed: !completed })
+      .eq("id", id);
+    // Reload tasks
+    const { data } = await supabase
+      .from("tasks")
+      .select("id, title, category, completed")
+      .order("created_at", { ascending: false });
+    setTasks((data as Task[]) || []);
+  };
 
   return (
     <div className="space-y-6">

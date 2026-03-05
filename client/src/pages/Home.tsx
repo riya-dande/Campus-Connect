@@ -10,8 +10,10 @@ import AcademicDashboard from "@/components/dashboard/AcademicDashboard";
 import SocialFeed from "@/components/social/SocialFeed";
 import StudyGroups from "@/components/study/StudyGroups";
 import EventDiscovery from "@/components/events/EventDiscovery";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+
 import { 
   Trophy, Clock, Target, Lightbulb, Users, 
   ArrowRight, MessageCircle, Sparkles,
@@ -23,31 +25,114 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+
+interface LocalTask {
+  id: number;
+  text: string;
+  done: boolean;
+  type: string;
+}
+
+const TASK_TYPES = [
+  "Academic",
+  "Club",
+  "Career",
+  "Personal",
+  "Placement",
+  "Exam",
+  "Project",
+  "Event",
+  "Other"
+];
+
+const eventDates = [
+  new Date(2026, 2, 2),
+  new Date(2026, 2, 4),
+  new Date(2026, 2, 6),
+  new Date(2026, 2, 8)
+];
 
 export default function Home() {
   const { user } = useStore();
-  const [tasks, setTasks] = useState([
-    { id: 1, text: "Operating Systems Assignment", done: false, type: "Academic" },
-    { id: 2, text: "Hackathon Registration", done: true, type: "Club" },
-    { id: 3, text: "Resume Peer Review", done: false, type: "Career" },
-  ]);
+
+  const [tasks, setTasks] = useState<LocalTask[]>([]);
   const [newTask, setNewTask] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [taskType, setTaskType] = useState(TASK_TYPES[0]);
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
-  };
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const addTask = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+
+      const { data } = await supabase
+        .from("tasks")
+        .select("id, title, category, completed");
+
+      if (data) {
+        setTasks(
+          data.map((t: any) => ({
+            id: t.id,
+            text: t.title,
+            done: t.completed,
+            type: t.category
+          }))
+        );
+      }
+
+      setLoading(false);
+    };
+
+    fetchTasks();
+  }, []);
+
+  const handleAddTask = async (e: any) => {
     e.preventDefault();
     if (!newTask.trim()) return;
-    setTasks([...tasks, { id: Date.now(), text: newTask, done: false, type: "Personal" }]);
+    await supabase
+      .from("tasks")
+      .insert([{ title: newTask, category: taskType, completed: false }]);
     setNewTask("");
+    const { data } = await supabase
+      .from("tasks")
+      .select("id, title, category, completed");
+    if (data) {
+      setTasks(
+        data.map((t: any) => ({
+          id: t.id,
+          text: t.title,
+          done: t.completed,
+          type: t.category
+        }))
+      );
+    }
+  };
+
+  const toggleTask = async (id: number, done: boolean) => {
+    await supabase
+      .from("tasks")
+      .update({ completed: !done })
+      .eq("id", id);
+
+    setTasks(tasks.map(t => t.id === id ? { ...t, done: !done } : t));
+  };
+
+  const deleteTask = async (id: number) => {
+    await supabase.from("tasks").delete().eq("id", id);
+    setTasks(tasks.filter(t => t.id !== id));
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Clean Header */}
       <section className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="space-y-1">
@@ -83,8 +168,8 @@ export default function Home() {
           </Card>
         </div>
       </section>
-
       <Tabs defaultValue="overview" className="w-full">
+
         <TabsList className="w-full justify-start h-auto p-1 bg-transparent gap-1 border-b border-border/50 rounded-none mb-6 overflow-x-auto">
           <TabsTrigger 
             value="overview" 
@@ -130,157 +215,227 @@ export default function Home() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-0 space-y-6">
+        <TabsContent value="overview">
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
+
+            {/* LEFT SIDE */}
             <div className="lg:col-span-2 space-y-6">
+
               <Announcements />
-              
-              {/* Simplified Tasks */}
-              <Card className="border border-border/50">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
                     <ListTodo className="w-5 h-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">Today's Tasks</CardTitle>
-                      <p className="text-sm text-muted-foreground">Stay on track</p>
-                    </div>
-                  </div>
+                    Today's Tasks
+                  </CardTitle>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
-                  <form onSubmit={addTask} className="flex gap-2">
-                    <Input 
-                      placeholder="Add a task..." 
+
+                  <form onSubmit={handleAddTask} className="flex gap-2">
+                    <Input
+                      placeholder="Add task..."
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
-                      className="flex-1"
                     />
-                    <Button type="submit" size="sm">
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                    <select
+                      value={taskType}
+                      onChange={e => setTaskType(e.target.value)}
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      {TASK_TYPES.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                    <button className="bg-purple-600 text-white px-4 rounded">
+                      +
+                    </button>
                   </form>
-                  <div className="space-y-2">
-                    {tasks.map((task) => (
-                      <div 
-                        key={task.id}
-                        className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50",
-                          task.done && "opacity-60"
-                        )}
-                        onClick={() => toggleTask(task.id)}
-                      >
-                        <div className={cn(
-                          "w-5 h-5 rounded border-2 flex items-center justify-center",
-                          task.done ? "bg-primary border-primary" : "border-muted-foreground/30"
-                        )}>
-                          {task.done && <CheckCircle2 className="w-3 h-3 text-white" />}
+
+                  {loading ? (
+                    <p>Loading...</p>
+                  ) : (
+                    <div className="task-list">
+                      {tasks.map((task) => (
+                        <div key={task.id} className="task-item" style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+                          <input
+                            type="checkbox"
+                            checked={task.done}
+                            onChange={() => toggleTask(task.id, task.done)}
+                            style={{ marginRight: 12 }}
+                          />
+                          <span
+                            style={{
+                              textDecoration: task.done ? "line-through" : "none",
+                              opacity: task.done ? 0.5 : 1,
+                              marginRight: 12,
+                              fontSize: 18
+                            }}
+                          >
+                            {task.text}
+                          </span>
+                          <div style={{
+                            border: "1px solid #e5e7eb",
+                            borderRadius: 8,
+                            padding: "2px 12px",
+                            background: "#f9fafb",
+                            marginLeft: 8,
+                            marginRight: 8,
+                            minWidth: 80,
+                            textAlign: "center",
+                            fontWeight: 500,
+                            color: "#6d28d9"
+                          }}>
+                            {task.type}
+                          </div>
+                          {task.done && (
+                            <button
+                              onClick={() => deleteTask(task.id)}
+                              style={{ marginLeft: 12, background: "none", border: "none", color: "#a855f7", fontSize: 20, cursor: "pointer" }}
+                              aria-label="Delete task"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
-                        <div className="flex-1">
-                          <p className={cn("text-sm", task.done && "line-through")}>{task.text}</p>
-                          <Badge variant="outline" className="text-xs mt-1">{task.type}</Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
+
                 </CardContent>
               </Card>
+
             </div>
 
-            {/* Sidebar */}
+
+            {/* RIGHT SIDEBAR */}
+
             <div className="space-y-6">
+
+              {/* CALENDAR */}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CalendarDays className="w-5 h-5 text-primary" />
+                    Calendar
+                  </CardTitle>
+
+                  <p className="text-sm text-muted-foreground">
+                    Your month at a glance
+                  </p>
+                </CardHeader>
+
+                <CardContent className="flex flex-col items-center">
+                  <div className="w-full max-w-[280px]">
+                    <DayPicker
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      showOutsideDays
+                      className="calendar-ui"
+                      modifiers={{
+                        event: eventDates
+                      }}
+                      modifiersClassNames={{
+                        event: "event-dot"
+                      }}
+                    />
+                  </div>
+                  {date && (
+                    <p className="text-sm text-muted-foreground mt-3">
+                      Selected: {date.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "2-digit",
+                        year: "numeric"
+                      })}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+
               <CampusLifeHub />
-              
-              {/* Gamification Card */}
-              <Card className="border border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
+
+              {/* LEVEL */}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-yellow-500" />
                     Level {user.level}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>XP Progress</span>
-                      <span>{user.xp}/{user.xp + user.xpToNext}</span>
-                    </div>
-                    <Progress value={(user.xp / (user.xp + user.xpToNext)) * 100} className="h-2" />
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm">
-                    <Flame className="w-4 h-4 text-orange-500" />
-                    <span>{user.streak} day streak</span>
+
+                <CardContent>
+
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>XP Progress</span>
+                    <span>{user.xp}/{user.xp + user.xpToNext}</span>
                   </div>
 
-                  <div className="pt-2 border-t border-border/50">
-                    <p className="text-sm font-medium mb-2">Recent Achievements</p>
-                    <div className="space-y-2">
-                      {[
-                        { icon: "🎯", title: "Task Master", desc: "Completed 5 tasks" },
-                        { icon: "🔥", title: "Study Streak", desc: "12 day streak" },
-                        { icon: "🎓", title: "Academic Star", desc: "GPA 3.8+" }
-                      ].map((achievement, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <span className="text-lg">{achievement.icon}</span>
-                          <div>
-                            <p className="font-medium">{achievement.title}</p>
-                            <p className="text-xs text-muted-foreground">{achievement.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <Progress value={(user.xp/(user.xp+user.xpToNext))*100}/>
+
+                  <div className="flex items-center gap-2 mt-4 text-sm">
+                    <Flame className="w-4 h-4 text-orange-500"/>
+                    {user.streak} day streak
                   </div>
+
                 </CardContent>
               </Card>
-              
-              <Card className="border border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
+
+
+              {/* PROGRESS */}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-primary"/>
                     Progress
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Semester 6</span>
-                      <span>72%</span>
-                    </div>
-                    <Progress value={72} className="h-2" />
+
+                <CardContent>
+
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Semester 6</span>
+                    <span>72%</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>OS Finals Prep</span>
-                      <span>45%</span>
-                    </div>
-                    <Progress value={45} className="h-2" />
-                  </div>
+
+                  <Progress value={72}/>
+
                 </CardContent>
               </Card>
+
             </div>
+
           </div>
+
         </TabsContent>
 
-        <TabsContent value="academic" className="mt-0">
-          <AcademicDashboard />
+        <TabsContent value="academic">
+          <AcademicDashboard/>
         </TabsContent>
 
-        <TabsContent value="social" className="mt-0">
-          <SocialFeed />
+        <TabsContent value="social">
+          <SocialFeed/>
         </TabsContent>
-
         <TabsContent value="connect" className="mt-0">
           <CommunicationHub />
         </TabsContent>
-
-        <TabsContent value="study" className="mt-0">
-          <StudyGroups />
+        <TabsContent value="study">
+          <StudyGroups/>
         </TabsContent>
 
-        <TabsContent value="events" className="mt-0">
-          <EventDiscovery />
+        <TabsContent value="events">
+          <EventDiscovery/>
         </TabsContent>
+
       </Tabs>
+
     </div>
   );
 }

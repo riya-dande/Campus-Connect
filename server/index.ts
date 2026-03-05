@@ -63,13 +63,12 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const port = parseInt(process.env.PORT || "3000", 10);
 
   httpServer.listen(
     {
       port,
-      host: "0.0.0.0",
-      ...(process.platform !== "win32" && { reusePort: true }),
+      host: "0.0.0.0"
     },
     () => {
       log(`serving on port ${port}`);

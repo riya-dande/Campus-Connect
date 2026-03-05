@@ -6,9 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import billboardImage from '@assets/generated_images/futuristic_digital_billboard_on_campus.png';
+import { supabase } from "@/lib/supabaseClient";
 
 const groups = [
   { id: 1, name: "Coding Guild", icon: "💻", active: true },
@@ -19,25 +20,38 @@ const groups = [
 export default function CommunicationHub() {
   const [activeGroup, setActiveGroup] = useState(groups[0].id);
   const [activeTab, setActiveTab] = useState("chat");
+  const [channels, setChannels] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedChannel, setSelectedChannel] = useState<{ id: string; name: string } | null>(null);
+  const [messages, setMessages] = useState<Array<{ user_id: string; content: string; created_at: string; channel_id?: string }>>([]);
+  const [sending, setSending] = useState(false);
 
-  const liveStreams = [
-    {
-      id: 1,
-      title: "Live: OS Study Session",
-      streamer: "Prof. Smith",
-      viewers: 45,
-      category: "Academic",
-      thumbnail: billboardImage
-    },
-    {
-      id: 2,
-      title: "Campus Tour 2026",
-      streamer: "Student Council",
-      viewers: 120,
-      category: "Campus Life",
-      thumbnail: billboardImage
-    }
-  ];
+  // Fetch channels from Supabase on mount
+  useEffect(() => {
+    const fetchChannels = async () => {
+      const { data, error } = await supabase.from("channels").select("id, name");
+      if (!error && data) {
+        setChannels(data);
+        if (!selectedChannel && data.length > 0) {
+          setSelectedChannel(data[0]);
+        }
+      }
+    };
+    fetchChannels();
+  }, []);
+
+  // Fetch messages for selected channel
+  useEffect(() => {
+    if (!selectedChannel) return;
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("user_id, content, created_at, channel_id")
+        .eq("channel_id", selectedChannel.id)
+        .order("created_at", { ascending: true });
+      if (!error && data) setMessages(data);
+    };
+    fetchMessages();
+  }, [selectedChannel]);
 
   return (
     <div className="h-[600px] flex bg-card rounded-2xl overflow-hidden border border-border/50 shadow-xl">
@@ -84,7 +98,7 @@ export default function CommunicationHub() {
             </TabsList>
           </div>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col m-0">
+          <TabsContent value="chat" className="flex-1 flex flex-row m-0">
             {/* Channel List */}
             <div className="w-48 bg-muted/10 border-r border-border/50 flex flex-col">
               <div className="p-4 font-bold text-sm border-b border-border/50 flex justify-between items-center">
@@ -93,18 +107,23 @@ export default function CommunicationHub() {
               </div>
               <ScrollArea className="flex-1 p-2">
                 <div className="space-y-1">
-                  {['announcements', 'general', 'showcase', 'random'].map((ch) => (
-                    <div 
-                      key={ch} 
-                      className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors",
-                        ch === 'general' ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
-                      )}
-                    >
-                      <Hash className="w-4 h-4" />
-                      {ch}
-                    </div>
-                  ))}
+                  {channels.length === 0 ? (
+                    <div className="text-muted-foreground px-4 py-2">No channels found</div>
+                  ) : (
+                    channels.map((ch) => (
+                      <div
+                        key={ch.id}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors",
+                          selectedChannel && selectedChannel.id === ch.id ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
+                        )}
+                        onClick={() => setSelectedChannel(ch)}
+                      >
+                        <Hash className="w-4 h-4" />
+                        {ch.name}
+                      </div>
+                    ))
+                  )}
                 </div>
               </ScrollArea>
             </div>
@@ -114,7 +133,7 @@ export default function CommunicationHub() {
               <div className="p-4 border-b border-border/50 flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Hash className="w-5 h-5 text-muted-foreground" />
-                  <span className="font-bold">general</span>
+                  <span className="font-bold">{selectedChannel ? selectedChannel.name : "Select a channel"}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground">
@@ -128,36 +147,63 @@ export default function CommunicationHub() {
 
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-6">
-                  {[
-                    { user: "Sarah", text: "Has anyone seen the new Placement post?", time: "12:30 PM" },
-                    { user: "Alex", text: "Yeah, just checked it. The Google drive looks interesting!", time: "12:32 PM" },
-                    { user: "Me", text: "I'm working on my portfolio for that right now 🚀", time: "12:35 PM" },
-                  ].map((msg, i) => (
-                    <div key={i} className="flex gap-3 group">
-                      <Avatar className="w-10 h-10 ring-2 ring-background">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.user}`} />
-                        <AvatarFallback>{msg.user[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-sm">{msg.user}</span>
-                          <span className="text-[10px] text-muted-foreground">{msg.time}</span>
+                  {messages.length === 0 ? (
+                    <div className="text-muted-foreground">No messages yet.</div>
+                  ) : (
+                    messages.map((msg, i) => (
+                      <div key={i} className="flex gap-3 group">
+                        <Avatar className="w-10 h-10 ring-2 ring-background">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.user_id}`} />
+                          <AvatarFallback>{msg.user_id?.slice(0,2) || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm">{msg.user_id}</span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(msg.created_at).toLocaleTimeString()}</span>
+                          </div>
+                          <p className="text-sm leading-relaxed">{msg.content}</p>
                         </div>
-                        <p className="text-sm leading-relaxed">{msg.text}</p>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </ScrollArea>
 
               <div className="p-4">
-                <div className="bg-muted/30 p-2 rounded-xl flex items-center gap-2 border border-border/50">
+                <form
+                  className="bg-muted/30 p-2 rounded-xl flex items-center gap-2 border border-border/50"
+                  onSubmit={async e => {
+                    e.preventDefault();
+                    if (!selectedChannel) return;
+                    // Replace with your user_id logic
+                    const user_id = "demo-user";
+                    const input = e.target.elements[0].value;
+                    if (!input.trim()) return;
+                    setSending(true);
+                    const { error } = await supabase
+                      .from("messages")
+                      .insert([
+                        { user_id, content: input, channel_id: selectedChannel.id }
+                      ]);
+                    e.target.reset();
+                    setSending(false);
+                    // Reload messages for channel
+                    const { data } = await supabase
+                      .from("messages")
+                      .select("user_id, content, created_at, channel_id")
+                      .eq("channel_id", selectedChannel.id)
+                      .order("created_at", { ascending: true });
+                    if (data) setMessages(data);
+                  }}
+                >
                   <Plus className="w-5 h-5 text-muted-foreground ml-2" />
                   <input 
                     className="flex-1 bg-transparent border-none text-sm focus:ring-0 p-2" 
-                    placeholder="Message #general"
+                    placeholder={`Message #${selectedChannel ? selectedChannel.name : "channel"}`}
+                    disabled={sending}
                   />
-                </div>
+                  <Button type="submit" disabled={sending}>Send</Button>
+                </form>
               </div>
             </div>
           </TabsContent>
@@ -200,7 +246,7 @@ export default function CommunicationHub() {
             </div>
           </TabsContent>
 
-          <TabsContent value="live" className="flex-1 m-0">
+          {/* <TabsContent value="live" className="flex-1 m-0">
             <div className="flex-1 flex flex-col bg-background">
               <div className="p-4 border-b border-border/50 flex justify-between items-center">
                 <h3 className="font-bold flex items-center gap-2">
@@ -249,7 +295,7 @@ export default function CommunicationHub() {
                 </div>
               </ScrollArea>
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>
