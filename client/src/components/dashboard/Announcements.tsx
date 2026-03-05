@@ -1,141 +1,128 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 import { cn } from "@/lib/utils";
-import { Calendar, Bell, Info, Award, ExternalLink, ChevronDown } from "lucide-react";
+import { Award, Bell, ChevronDown, ExternalLink, Info } from "lucide-react";
 import { useRef } from "react";
-import billboardImage from '@assets/generated_images/futuristic_digital_billboard_on_campus.png';
+import billboardImage from "@assets/generated_images/futuristic_digital_billboard_on_campus.png";
 
-export default function BillboardAnnouncements() {
+export default function Announcements() {
   const { announcements, markRead } = useStore();
   const listRef = useRef<HTMLDivElement>(null);
 
   const scrollToList = () => {
-    listRef.current?.scrollIntoView({ behavior: 'smooth' });
+    listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const recentAnnouncements = announcements.slice(0, 3);
 
   return (
-    <div className="space-y-12">
-      {/* 3D Graphic Billboard Section */}
-      <div className="relative group perspective-1000">
+    <div className="space-y-6">
+      <div className="relative group">
         <motion.div
-          initial={{ rotateX: 20, opacity: 0, y: 50 }}
+          initial={{ rotateX: 16, opacity: 0, y: 30 }}
           animate={{ rotateX: 0, opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative aspect-[21/9] w-full rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/20 border border-white/10"
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          className="relative aspect-[19/8] w-full rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/20 border border-white/15"
         >
-          {/* Background Image */}
-          <img 
-            src={billboardImage} 
-            alt="Campus Billboard" 
-            className="absolute inset-0 w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-1000"
+          <img
+            src={billboardImage}
+            alt="Campus announcements board"
+            className="absolute inset-0 w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-700"
           />
-          
-          {/* Glassmorphism Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          
-          {/* Billboard Content */}
-          <div className="absolute inset-0 p-8 flex flex-col justify-end">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="px-3 py-1 bg-primary/20 backdrop-blur-md rounded-full border border-primary/30 flex items-center gap-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+
+          <div className="absolute inset-0 p-6 md:p-7 flex flex-col justify-end">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/40 backdrop-blur-md">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
                 </span>
-                <span className="text-[10px] font-bold text-white uppercase tracking-widest">Live Campus Updates</span>
-              </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white">Live Announcements</span>
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {recentAnnouncements.map((item, i) => (
-                <motion.div
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              {recentAnnouncements.map((item, idx) => (
+                <motion.button
                   key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
+                  type="button"
+                  initial={{ opacity: 0, x: -15 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + (i * 0.1) }}
+                  transition={{ delay: 0.2 + idx * 0.08 }}
                   onClick={() => {
                     markRead(item.id);
                     scrollToList();
                   }}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group/item"
+                  className="text-left rounded-2xl p-3 bg-white/8 border border-white/15 backdrop-blur-md hover:bg-white/15 transition-colors"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-[8px] border-primary/50 text-primary uppercase">
-                      {item.category}
-                    </Badge>
-                  </div>
-                  <h3 className="text-white text-sm font-bold line-clamp-2 group-hover/item:text-primary transition-colors">
-                    {item.title}
-                  </h3>
-                </motion.div>
+                  <Badge variant="outline" className="text-[9px] border-primary/60 text-primary mb-2">
+                    {item.category}
+                  </Badge>
+                  <p className="text-white text-sm font-semibold leading-snug">{item.title}</p>
+                </motion.button>
               ))}
             </div>
 
-            <motion.button
-              whileHover={{ y: 5 }}
+            <button
+              type="button"
               onClick={scrollToList}
-              className="mx-auto flex flex-col items-center gap-2 text-white/60 hover:text-primary transition-colors"
+              className="mx-auto flex flex-col items-center gap-1 text-white/70 hover:text-primary transition-colors"
             >
-              <span className="text-[10px] font-bold uppercase tracking-widest">Scroll to full list</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Open full board</span>
               <ChevronDown className="w-4 h-4 animate-bounce" />
-            </motion.button>
+            </button>
           </div>
         </motion.div>
-        
-        {/* Holographic light effect */}
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[80%] h-20 bg-primary/20 blur-[100px] -z-10" />
+
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[80%] h-16 bg-primary/20 blur-[80px] -z-10" />
       </div>
 
-      {/* Full Announcements List */}
-      <div ref={listRef} className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-heading font-bold">Campus Bulletin</h2>
-          <div className="flex gap-2">
-            {['All', 'Placement', 'Academic', 'Club'].map(f => (
-              <Badge key={f} variant="outline" className="rounded-full px-4 py-1 cursor-pointer hover:bg-primary/5">
-                {f}
+      <div ref={listRef} className="space-y-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-xl font-heading font-bold">Campus Bulletin</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            {["All", "Placement", "Academic", "Club"].map((filter) => (
+              <Badge key={filter} variant="outline" className="rounded-full px-4 py-1 border-border/70">
+                {filter}
               </Badge>
             ))}
           </div>
         </div>
 
-        <div className="grid gap-4">
-          {announcements.map((item, index) => (
+        <div className="grid gap-3">
+          {announcements.map((item) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className={cn(
-                "group relative overflow-hidden transition-all duration-300 rounded-3xl border border-border/50 hover:border-primary/30",
-                !item.isRead ? "bg-primary/[0.02] ring-1 ring-primary/10" : "bg-card"
+                "group rounded-2xl border p-4 transition-colors",
+                !item.isRead ? "border-primary/30 bg-primary/5" : "border-border/60 bg-card hover:bg-muted/30"
               )}
             >
-              <div className="p-6 flex items-start gap-4">
-                <div className={cn(
-                  "p-3 rounded-2xl shrink-0",
-                  !item.isRead ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                )}>
-                  {item.category === 'Exam' ? <Info className="w-5 h-5" /> : 
-                   item.category === 'Placement' ? <Award className="w-5 h-5" /> : 
-                   <Bell className="w-5 h-5" />}
+              <div className="flex items-start gap-3">
+                <div className={cn("p-2 rounded-xl shrink-0", !item.isRead ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                  {item.category === "Exam" ? (
+                    <Info className="w-4 h-4" />
+                  ) : item.category === "Placement" ? (
+                    <Award className="w-4 h-4" />
+                  ) : (
+                    <Bell className="w-4 h-4" />
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      {item.author} • {item.date}
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {item.author} | {item.date}
                     </span>
-                    {!item.isRead && (
-                      <Badge className="h-4 text-[8px] bg-primary">NEW</Badge>
-                    )}
+                    {!item.isRead && <Badge className="h-5 text-[10px] bg-primary">New</Badge>}
                   </div>
-                  <h3 className="text-lg font-bold group-hover:text-primary transition-colors truncate">
-                    {item.title}
-                  </h3>
+                  <p className="text-sm md:text-base font-semibold leading-snug">{item.title}</p>
                 </div>
 
                 <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
@@ -149,5 +136,3 @@ export default function BillboardAnnouncements() {
     </div>
   );
 }
-
-import { Button } from "@/components/ui/button";

@@ -123,14 +123,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {leftIcon && <span className="shrink-0">{leftIcon}</span>}
-            <span className="truncate whitespace-nowrap">{children}</span>
+            {children}
             {rightIcon && <span className="shrink-0">{rightIcon}</span>}
           </>
         )}
       </>
     )
 
-    // If animation is enabled, use motion button
+    // If animation is enabled, use wrapper motion element.
     if (animate && !asChild) {
       return (
         <motion.div

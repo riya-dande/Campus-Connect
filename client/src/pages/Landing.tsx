@@ -79,11 +79,11 @@ export default function Landing() {
                 CampusConnect
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" onClick={() => setLocation("/login")}>
+            <div className="hidden md:flex items-center gap-3">
+              <Button variant="ghost" size="sm" className="rounded-full px-5" onClick={() => setLocation("/login")}>
                 Log In
               </Button>
-              <Button onClick={() => setLocation("/login")}>
+              <Button size="lg" className="rounded-full px-7" onClick={() => setLocation("/login")}>
                 Get Started
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -160,11 +160,11 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Button size="lg" className="h-12 px-8 text-base" onClick={() => setLocation("/login")}>
+              <Button size="lg" className="h-12 rounded-full px-8 text-base font-semibold" onClick={() => setLocation("/login")}>
                 Get Started Free
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button variant="outline" size="lg" className="h-12 px-8 text-base">
+              <Button variant="outline" size="lg" className="h-12 rounded-full px-8 text-base font-semibold border-border/70">
                 <Play className="w-5 h-5 mr-2" />
                 Watch Demo
               </Button>
@@ -294,11 +294,11 @@ export default function Landing() {
             <Button 
               size="lg" 
               variant="secondary"
-              className="h-12 px-8 text-base"
+              className="h-12 rounded-full px-8 text-base font-semibold"
               onClick={() => setLocation("/login")}
             >
               Get Started Now
-              {/* <ArrowRight className="w-5 h-5 ml-2" /> */}
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </motion.div>
         </div>

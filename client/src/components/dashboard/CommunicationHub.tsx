@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MessageSquare, Hash, Settings, Plus, Video, Phone, Mic, Radio, Users, Eye, Heart } from "lucide-react";
+import { MessageSquare, Hash, Settings, Plus, Video, Phone, Mic, Radio, Users, Eye, Heart, UserCheck, Briefcase, Award, CalendarPlus, Bot } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -80,6 +80,10 @@ export default function CommunicationHub() {
               <TabsTrigger value="live" className="flex items-center gap-2">
                 <Radio className="w-4 h-4" />
                 Live
+              </TabsTrigger>
+              <TabsTrigger value="support" className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4" />
+                Support
               </TabsTrigger>
             </TabsList>
           </div>
@@ -248,6 +252,106 @@ export default function CommunicationHub() {
                   ))}
                 </div>
               </ScrollArea>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="support" className="flex-1 m-0">
+            <div className="flex-1 bg-background p-4 md:p-5 space-y-4 overflow-auto">
+              <Card className="p-4 border border-border/50 bg-primary/5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-primary/15 text-primary">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">AI Student Assistant</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Ask for attendance recovery plans, exam strategy, and internship profile feedback.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <Button size="sm" className="rounded-full">Plan Attendance</Button>
+                      <Button size="sm" variant="outline" className="rounded-full">Draft Leave Mail</Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="p-4 border border-border/50">
+                  <h3 className="font-semibold flex items-center gap-2 mb-3">
+                    <UserCheck className="w-4 h-4 text-primary" />
+                    Student Counsellor
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="p-3 rounded-xl bg-muted/30">
+                      <p className="font-medium">Dr. Venkata Lalita Parameswari Dantu</p>
+                      <p className="text-muted-foreground">Semester 3-2 • Academic Counselling</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/30">
+                      <p className="font-medium">Dr. Sharada Adepu</p>
+                      <p className="text-muted-foreground">Semester 3-1 • Career Counselling</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4 border border-border/50">
+                  <h3 className="font-semibold flex items-center gap-2 mb-3">
+                    <CalendarPlus className="w-4 h-4 text-primary" />
+                    Leave Support
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="p-3 rounded-xl bg-muted/30 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Medical Leave</p>
+                        <p className="text-muted-foreground">Draft pending faculty approval</p>
+                      </div>
+                      <Badge variant="outline">Pending</Badge>
+                    </div>
+                    <Button className="w-full rounded-xl mt-1">Apply New Leave</Button>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="p-4 border border-border/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Award className="w-4 h-4 text-primary" />
+                      Student Achievements
+                    </h3>
+                    <Button size="sm" variant="outline" className="rounded-full">Add New</Button>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
+                      <p className="font-medium">Hackathon Finalist</p>
+                      <p className="text-muted-foreground">Smart Campus Hackathon • Jan 2026</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
+                      <p className="font-medium">Paper Presentation</p>
+                      <p className="text-muted-foreground">AI and Vision Symposium • Dec 2025</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4 border border-border/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-primary" />
+                      Student Internships
+                    </h3>
+                    <Button size="sm" variant="outline" className="rounded-full">Add New</Button>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
+                      <p className="font-medium">Frontend Intern • CampusConnect Labs</p>
+                      <p className="text-muted-foreground">May 2026 - Jul 2026</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/30 text-sm">
+                      <p className="font-medium">No other internships yet</p>
+                      <p className="text-muted-foreground">Use AI mentor to improve resume and apply.</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

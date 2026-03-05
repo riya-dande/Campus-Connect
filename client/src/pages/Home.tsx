@@ -10,10 +10,11 @@ import AcademicDashboard from "@/components/dashboard/AcademicDashboard";
 import SocialFeed from "@/components/social/SocialFeed";
 import StudyGroups from "@/components/study/StudyGroups";
 import EventDiscovery from "@/components/events/EventDiscovery";
+import AiInsightsPanel from "@/components/ai/AiInsightsPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Trophy, Clock, Target, Lightbulb, Users, 
+import {
+  Trophy, Clock, Target, Lightbulb, Users,
   ArrowRight, MessageCircle, Sparkles,
   GraduationCap, CalendarDays, ListTodo, Plus,
   CheckCircle2, MoreVertical, Layout, Camera, MapPin, Calendar,
@@ -54,7 +55,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <GraduationCap className="w-5 h-5 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
-              {user.major} • {user.year}
+              {user.major} • {user.year} • Sem 3-2
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -66,6 +67,14 @@ export default function Home() {
         </div>
 
         <div className="flex gap-3">
+          <Card className="flex items-center gap-3 p-4 border border-border/50 bg-white">
+            <GraduationCap className="w-5 h-5 text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">CGPA</p>
+              <p className="font-bold text-lg">{user.cgpa}</p>
+            </div>
+          </Card>
+
           <Card className="flex items-center gap-3 p-4 border border-border/50">
             <Zap className="w-5 h-5 text-amber-500" />
             <div>
@@ -73,7 +82,7 @@ export default function Home() {
               <p className="font-bold text-lg">12 Days</p>
             </div>
           </Card>
-          
+
           <Card className="flex items-center gap-3 p-4 border border-border/50">
             <Clock className="w-5 h-5 text-emerald-500" />
             <div>
@@ -86,43 +95,43 @@ export default function Home() {
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="w-full justify-start h-auto p-1 bg-transparent gap-1 border-b border-border/50 rounded-none mb-6 overflow-x-auto">
-          <TabsTrigger 
-            value="overview" 
+          <TabsTrigger
+            value="overview"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Layout className="w-4 h-4 mr-2" />
             Overview
           </TabsTrigger>
-          <TabsTrigger 
-            value="academic" 
+          <TabsTrigger
+            value="academic"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             Academic
           </TabsTrigger>
-          <TabsTrigger 
-            value="social" 
+          <TabsTrigger
+            value="social"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Heart className="w-4 h-4 mr-2" />
             Social
           </TabsTrigger>
-          <TabsTrigger 
-            value="connect" 
+          <TabsTrigger
+            value="connect"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Users className="w-4 h-4 mr-2" />
             Connect
           </TabsTrigger>
-          <TabsTrigger 
-            value="study" 
+          <TabsTrigger
+            value="study"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Lightbulb className="w-4 h-4 mr-2" />
             Study
           </TabsTrigger>
-          <TabsTrigger 
-            value="events" 
+          <TabsTrigger
+            value="events"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Calendar className="w-4 h-4 mr-2" />
@@ -135,7 +144,8 @@ export default function Home() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               <Announcements />
-              
+              <AiInsightsPanel />
+
               {/* Simplified Tasks */}
               <Card className="border border-border/50">
                 <CardHeader className="pb-3">
@@ -149,8 +159,8 @@ export default function Home() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <form onSubmit={addTask} className="flex gap-2">
-                    <Input 
-                      placeholder="Add a task..." 
+                    <Input
+                      placeholder="Add a task..."
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                       className="flex-1"
@@ -161,7 +171,7 @@ export default function Home() {
                   </form>
                   <div className="space-y-2">
                     {tasks.map((task) => (
-                      <div 
+                      <div
                         key={task.id}
                         className={cn(
                           "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50",
@@ -189,7 +199,7 @@ export default function Home() {
             {/* Sidebar */}
             <div className="space-y-6">
               <CampusLifeHub />
-              
+
               {/* Gamification Card */}
               <Card className="border border-border/50">
                 <CardHeader className="pb-3">
@@ -206,7 +216,7 @@ export default function Home() {
                     </div>
                     <Progress value={(user.xp / (user.xp + user.xpToNext)) * 100} className="h-2" />
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-sm">
                     <Flame className="w-4 h-4 text-orange-500" />
                     <span>{user.streak} day streak</span>
@@ -232,7 +242,7 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="border border-border/50">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
