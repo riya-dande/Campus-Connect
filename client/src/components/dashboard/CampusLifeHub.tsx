@@ -1,171 +1,175 @@
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Flame, 
-  Map as MapIcon, 
-  Search, 
-  Coffee, 
-  BookOpen, 
-  Gamepad2, 
-  Users,
-  Zap,
-  Gift,
-  Navigation,
-  Activity,
-  UserPlus
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const spots = [
-  { id: 1, name: "Central Lawn", activity: "32 students here", details: "Frisbee match in progress", icon: Users, color: "bg-emerald-500", heat: "high" },
-  { id: 2, name: "Library Annex", activity: "Quiet Zone • 85% full", details: "Best for focused study", icon: BookOpen, color: "bg-blue-500", heat: "low" },
-  { id: 3, name: "Main Canteen", activity: "Happy Hour: 20% off", details: "Live acoustic session starts at 4 PM", icon: Coffee, color: "bg-amber-500", heat: "medium" },
-  { id: 4, name: "Innovation Lab", activity: "12 creators active", details: "3D printer available", icon: Zap, color: "bg-indigo-500", heat: "medium" },
+const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const calendarEvents = [
+  { id: 1, title: "OS Viva", date: "2026-03-06", time: "10:00 AM", venue: "LH-3", type: "Exam" },
+  { id: 2, title: "CVPR Lab", date: "2026-03-07", time: "02:00 PM", venue: "Lab-2", type: "Class" },
+  { id: 3, title: "Counsellor Session", date: "2026-03-08", time: "11:30 AM", venue: "Block A", type: "Support" },
+  { id: 4, title: "Placement Workshop", date: "2026-03-10", time: "04:00 PM", venue: "Seminar Hall", type: "Career" },
 ];
 
+function toIsoDate(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export default function CampusLifeHub() {
+  const [viewDate, setViewDate] = useState(new Date());
+  const today = new Date();
+  const todayIso = toIsoDate(today);
+
+  const { days, monthLabel } = useMemo(() => {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+
+    const leading = start.getDay();
+    const totalDays = end.getDate();
+    const cells: Array<{ date: Date; inMonth: boolean }> = [];
+
+    for (let i = 0; i < leading; i++) {
+      cells.push({ date: new Date(year, month, i - leading + 1), inMonth: false });
+    }
+    for (let d = 1; d <= totalDays; d++) {
+      cells.push({ date: new Date(year, month, d), inMonth: true });
+    }
+    while (cells.length % 7 !== 0) {
+      const nextDay = cells.length - (leading + totalDays) + 1;
+      cells.push({ date: new Date(year, month + 1, nextDay), inMonth: false });
+    }
+
+    return {
+      days: cells,
+      monthLabel: viewDate.toLocaleString("en-US", { month: "long", year: "numeric" }),
+    };
+  }, [viewDate]);
+
+  const monthEvents = useMemo(() => {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    return calendarEvents.filter((event) => {
+      const d = new Date(event.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    });
+  }, [viewDate]);
+
+  const eventMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const event of calendarEvents) {
+      map.set(event.date, (map.get(event.date) ?? 0) + 1);
+    }
+    return map;
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500">
-            <Navigation className="w-5 h-5 animate-pulse" />
+    <div className="space-y-4">
+      <Card className="p-4 border border-border/60 rounded-3xl shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+              <CalendarDays className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-heading font-bold">Calendar</h2>
+              <p className="text-xs text-muted-foreground">Your month at a glance</p>
+            </div>
           </div>
-          <h2 className="text-xl font-heading font-bold">Live Radar</h2>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="rounded-full"
+              onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="rounded-full"
+              onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Real-time</span>
+
+        <p className="text-sm font-semibold mb-3">{monthLabel}</p>
+        <div className="grid grid-cols-7 gap-1.5 text-center text-xs text-muted-foreground mb-2">
+          {weekDays.map((day) => (
+            <span key={day} className="py-1">{day}</span>
+          ))}
         </div>
-      </div>
-
-      {/* Interactive Visual Map Representation */}
-      <div className="relative aspect-[4/3] w-full bg-muted/30 rounded-[2rem] border border-border/50 overflow-hidden group">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
-        
-        {/* Abstract Map Grid */}
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
-        {/* Floating Pulsing Nodes */}
-        {spots.map((spot, i) => (
-          <motion.div
-            key={spot.id}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: i * 0.1 }}
-            className="absolute"
-            style={{ 
-              top: `${20 + (i * 18)}%`, 
-              left: `${15 + (i * 20) + (i % 2 * 10)}%` 
-            }}
-          >
-            <div className="relative group/node">
+        <div className="grid grid-cols-7 gap-1.5">
+          {days.map(({ date, inMonth }) => {
+            const iso = toIsoDate(date);
+            const isToday = iso === todayIso;
+            const hasEvent = eventMap.has(iso);
+            return (
               <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                key={`${iso}-${inMonth ? "in" : "out"}`}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "w-4 h-4 rounded-full blur-[2px] opacity-40",
-                  spot.color
+                  "relative h-9 rounded-lg flex items-center justify-center text-xs border",
+                  inMonth ? "bg-card border-border/60 text-foreground" : "bg-muted/20 border-border/40 text-muted-foreground/60",
+                  isToday && "bg-primary text-white border-primary font-semibold"
                 )}
-              />
-              <div className={cn(
-                "absolute top-0 left-0 w-4 h-4 rounded-full ring-2 ring-white shadow-lg z-10",
-                spot.color
-              )} />
-              
-              {/* Tooltip on hover */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/node:opacity-100 transition-all pointer-events-none whitespace-nowrap z-20">
-                <div className="bg-card/90 backdrop-blur-md border border-border/50 px-3 py-1.5 rounded-xl shadow-xl text-[10px] font-bold">
-                  {spot.name}
+              >
+                {date.getDate()}
+                {hasEvent && !isToday && (
+                  <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card className="p-4 border border-border/60 rounded-3xl shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold">Upcoming</h3>
+          <Badge variant="outline" className="rounded-full border-border/70">
+            {monthEvents.length} this month
+          </Badge>
+        </div>
+        <div className="space-y-2.5">
+          {monthEvents.length === 0 ? (
+            <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
+              No events in this month.
+            </div>
+          ) : (
+            monthEvents.map((event) => (
+              <div key={event.id} className="p-3 rounded-xl border border-border/60 bg-card">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">{event.title}</p>
+                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                    {event.type}
+                  </Badge>
+                </div>
+                <div className="mt-1.5 flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><Clock3 className="w-3.5 h-3.5" />{event.time}</span>
+                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-
-        <div className="absolute bottom-4 left-4 right-4 bg-background/60 backdrop-blur-md p-4 rounded-2xl border border-white/20">
-          <div className="flex items-center gap-3">
-            <Activity className="w-4 h-4 text-primary" />
-            <p className="text-[10px] font-medium leading-tight">
-              <span className="font-bold text-primary">Trend:</span> The <span className="underline decoration-primary/30 decoration-2">Central Lawn</span> is the most active spot right now.
-            </p>
-          </div>
+            ))
+          )}
         </div>
-      </div>
-
-      {/* Gamified Streaks & Rewards */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 border-none bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/20 rounded-3xl relative overflow-hidden group cursor-pointer transition-transform active:scale-95">
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-2">
-              <Zap className="w-6 h-6 fill-white" />
-              <Badge className="bg-white/20 border-none text-[8px]">BOOST</Badge>
-            </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Daily Points</p>
-            <p className="text-2xl font-black">2,450</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
-        </Card>
-
-        <Card className="p-4 border-none bg-gradient-to-br from-primary to-indigo-600 text-white shadow-lg shadow-primary/20 rounded-3xl relative overflow-hidden group cursor-pointer transition-transform active:scale-95">
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-2">
-              <Gift className="w-6 h-6 fill-white" />
-              <div className="flex -space-x-2">
-                {[1,2,3].map(i => (
-                  <div key={i} className="w-5 h-5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm flex items-center justify-center text-[8px] font-bold">{i}</div>
-                ))}
-              </div>
-            </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Coupons</p>
-            <p className="text-2xl font-black">3 Active</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
-        </Card>
-      </div>
-
-      {/* List View with more details */}
-      <div className="space-y-3">
-        {spots.map((spot) => (
-          <motion.div
-            key={spot.id}
-            whileHover={{ x: 5 }}
-            className="flex items-center gap-4 p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
-          >
-            <div className={cn("p-2.5 rounded-xl text-white shadow-md", spot.color)}>
-              <spot.icon className="w-4 h-4" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold group-hover:text-primary transition-colors">{spot.name}</h4>
-                {spot.heat === "high" && <Flame className="w-3 h-3 text-rose-500 fill-rose-500" />}
-              </div>
-              <p className="text-[10px] text-muted-foreground font-medium leading-tight">{spot.activity}</p>
-              <p className="text-[9px] text-muted-foreground/60 italic mt-0.5">{spot.details}</p>
-            </div>
-            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-all">
-              <UserPlus className="w-4 h-4 text-primary" />
-            </Button>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Quick Fun Actions */}
-      <div className="flex gap-2">
-        <Button variant="outline" className="flex-1 rounded-2xl h-12 gap-2 border-dashed hover:border-primary/50 hover:bg-primary/5 group">
-          <Gamepad2 className="w-4 h-4 text-primary group-hover:rotate-12 transition-transform" />
-          <span className="text-xs font-bold">Quick Game</span>
-        </Button>
-        <Button variant="outline" className="flex-1 rounded-2xl h-12 gap-2 border-dashed hover:border-primary/50 hover:bg-primary/5 group">
-          <Coffee className="w-4 h-4 text-primary group-hover:-rotate-12 transition-transform" />
-          <span className="text-xs font-bold">Find Buddy</span>
-        </Button>
-      </div>
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          AI can optimize this schedule based on exams and attendance.
+        </div>
+      </Card>
     </div>
   );
 }

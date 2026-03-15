@@ -139,7 +139,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <GraduationCap className="w-5 h-5 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
-              {user.major} • {user.year}
+              {user.major} • {user.year} • Sem 3-2
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -151,6 +151,14 @@ export default function Home() {
         </div>
 
         <div className="flex gap-3">
+          <Card className="flex items-center gap-3 p-4 border border-border/50 bg-white">
+            <GraduationCap className="w-5 h-5 text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">CGPA</p>
+              <p className="font-bold text-lg">{user.cgpa}</p>
+            </div>
+          </Card>
+
           <Card className="flex items-center gap-3 p-4 border border-border/50">
             <Zap className="w-5 h-5 text-amber-500" />
             <div>
@@ -158,7 +166,7 @@ export default function Home() {
               <p className="font-bold text-lg">12 Days</p>
             </div>
           </Card>
-          
+
           <Card className="flex items-center gap-3 p-4 border border-border/50">
             <Clock className="w-5 h-5 text-emerald-500" />
             <div>
@@ -171,43 +179,43 @@ export default function Home() {
       <Tabs defaultValue="overview" className="w-full">
 
         <TabsList className="w-full justify-start h-auto p-1 bg-transparent gap-1 border-b border-border/50 rounded-none mb-6 overflow-x-auto">
-          <TabsTrigger 
-            value="overview" 
+          <TabsTrigger
+            value="overview"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Layout className="w-4 h-4 mr-2" />
             Overview
           </TabsTrigger>
-          <TabsTrigger 
-            value="academic" 
+          <TabsTrigger
+            value="academic"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             Academic
           </TabsTrigger>
-          <TabsTrigger 
-            value="social" 
+          <TabsTrigger
+            value="social"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Heart className="w-4 h-4 mr-2" />
             Social
           </TabsTrigger>
-          <TabsTrigger 
-            value="connect" 
+          <TabsTrigger
+            value="connect"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Users className="w-4 h-4 mr-2" />
             Connect
           </TabsTrigger>
-          <TabsTrigger 
-            value="study" 
+          <TabsTrigger
+            value="study"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Lightbulb className="w-4 h-4 mr-2" />
             Study
           </TabsTrigger>
-          <TabsTrigger 
-            value="events" 
+          <TabsTrigger
+            value="events"
             className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all text-sm whitespace-nowrap"
           >
             <Calendar className="w-4 h-4 mr-2" />

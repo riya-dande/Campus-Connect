@@ -1,17 +1,20 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { 
-  GraduationCap, 
-  Users, 
-  Calendar, 
-  BookOpen, 
-  Briefcase, 
-  Trophy,
-  ArrowRight, 
-  CheckCircle,
+import {
+  ArrowRight,
+  BellRing,
+  BookOpen,
+  Brain,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  Clock3,
+  GraduationCap,
+  LineChart,
+  MessageSquare,
+  ShieldCheck,
   Sparkles,
-  Play
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,204 +25,220 @@ export default function Landing() {
   const features = [
     {
       icon: BookOpen,
-      title: "Academic Excellence",
-      description: "Track grades, attendance, and course progress with AI-powered insights"
+      title: "Academic Command Center",
+      description: "Track attendance, assignments, and exam prep in one clean workspace.",
     },
     {
-      icon: Users,
-      title: "Connect & Network",
-      description: "Connect with peers, seniors, alumni, and faculty in one unified platform"
+      icon: MessageSquare,
+      title: "Social + Communication Hub",
+      description: "Follow campus life, message peers, and collaborate with clubs and teams.",
     },
     {
       icon: Briefcase,
-      title: "Placement Ready",
-      description: "Access placement drives, practice problems, and career guidance"
+      title: "Career & Placement Support",
+      description: "Practice, prepare, and stay ready for internships and placement drives.",
     },
     {
       icon: Calendar,
-      title: "Smart Scheduling",
-      description: "Never miss a class or event with intelligent calendar management"
-    }
+      title: "Smart Calendar + Reminders",
+      description: "Get timely reminders for classes, deadlines, and campus events.",
+    },
   ];
 
-  const stats = [
-    { value: "10,000+", label: "Active Students" },
-    { value: "500+", label: "Companies" },
-    { value: "95%", label: "Placement Rate" },
-    { value: "50+", label: "Campus Clubs" }
+  const outcomes = [
+    {
+      title: "Students stay organized",
+      description: "Daily agenda, tasks, and announcements live in one place.",
+      icon: Clock3,
+    },
+    {
+      title: "Teams collaborate faster",
+      description: "Study groups and club communications stop getting scattered.",
+      icon: Users,
+    },
+    {
+      title: "Mentors guide with context",
+      description: "Progress signals help faculty and mentors support students better.",
+      icon: Brain,
+    },
   ];
 
-  const testimonials = [
+  const steps = [
     {
-      name: "Priya Sharma",
-      role: "Computer Science, Year 3",
-      quote: "CampusConnect helped me land my dream internship at Google!"
+      title: "Sign in and set your profile",
+      description: "Add your major, year, and goals so the dashboard adapts to you.",
+      icon: ShieldCheck,
     },
     {
-      name: "Arjun Patel",
-      role: "Electronics, Year 4",
-      quote: "The study groups feature connected me with the perfect team for my capstone project."
+      title: "Pick your focus areas",
+      description: "Academics, social, events, and career modules are ready from day one.",
+      icon: LineChart,
     },
     {
-      name: "Sneha Reddy",
-      role: "Management, Year 2",
-      quote: "AI insights helped me improve my CGPA from 7.5 to 8.5 in one semester!"
-    }
+      title: "Get reminders and insights",
+      description: "Receive nudges, deadlines, and progress visibility to stay on track.",
+      icon: BellRing,
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <motion.div
+          className="absolute left-[-120px] top-[-100px] h-[360px] w-[360px] rounded-full bg-primary/20 blur-3xl"
+          animate={{ x: [0, 28, 0], y: [0, 20, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute right-[-140px] top-[80px] h-[420px] w-[420px] rounded-full bg-purple-500/15 blur-3xl"
+          animate={{ x: [0, -30, 0], y: [0, 24, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-[-160px] left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl"
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
+        <div className="mx-auto h-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-2">
-              <GraduationCap className="w-8 h-8 text-primary" />
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <GraduationCap className="h-8 w-8 text-primary" />
+              <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-xl font-bold text-transparent">
                 CampusConnect
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" onClick={() => setLocation("/login")}>
+            <div className="hidden items-center gap-3 md:flex">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full px-5"
+                onClick={() => setLocation("/login")}
+              >
                 Log In
               </Button>
-              <Button onClick={() => setLocation("/login")}>
-                Get Started
-                <ArrowRight className="w-4 h-4 ml-2" />
+              <Button
+                size="lg"
+                className="rounded-full px-7"
+                onClick={() => setLocation("/login")}
+              >
+                Start Free
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-          <motion.div
-            className="absolute top-40 left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
-            animate={{ 
-              x: [0, 50, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl"
-            animate={{ 
-              x: [0, -40, 0],
-              y: [0, -50, 0],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-3xl"
-            animate={{ 
-              scale: [1, 1.1, 1],
-            }}
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
+      <section className="relative overflow-hidden pb-20 pt-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div>
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+                  <Sparkles className="h-4 w-4" />
+                  Student-first campus operating system
+                </span>
+              </motion.div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
+              <motion.h1
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+                className="max-w-2xl text-4xl font-bold leading-tight text-foreground sm:text-5xl md:text-6xl"
+              >
+                Your mini project with
+                <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"> real campus value</span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mt-6 max-w-xl text-lg text-muted-foreground"
+              >
+                CampusConnect introduces exactly what it does at the top level: academics, communication,
+                events, and placement readiness. Built to feel modern, clear, and attractive to students.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="mt-10 flex flex-col gap-4 sm:flex-row"
+              >
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full px-8 font-semibold"
+                  onClick={() => setLocation("/login")}
+                >
+                  Explore Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-border/70 px-8 font-semibold"
+                  onClick={() => setLocation("/login")}
+                >
+                  Try Demo Login
+                </Button>
+              </motion.div>
+
+            </div>
+
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.55, delay: 0.15 }}
+              className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-2xl shadow-primary/10 backdrop-blur-sm"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4" />
-                Your Complete Campus Companion
-              </span>
-            </motion.div>
-
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground max-w-4xl mx-auto leading-tight"
-            >
-              Everything You Need for
-              <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"> Campus Life</span>
-            </motion.h1>
-
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto"
-            >
-              From academics to placements, from connecting with peers to managing your schedule - 
-              CampusConnect is your all-in-one platform for a seamless college experience.
-            </motion.p>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
-              <Button size="lg" className="h-12 px-8 text-base" onClick={() => setLocation("/login")}>
-                Get Started Free
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button variant="outline" size="lg" className="h-12 px-8 text-base">
-                <Play className="w-5 h-5 mr-2" />
-                Watch Demo
-              </Button>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
-            >
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
+              <p className="mb-4 text-sm font-semibold uppercase tracking-wide text-primary">What students get</p>
+              <div className="space-y-3">
+                {[
+                  "One dashboard for classes, tasks, and deadlines",
+                  "Activity feed + chat for campus communication",
+                  "Career prep and placement alerts in context",
+                  "Progress signals that motivate daily consistency",
+                ].map((point) => (
+                  <div key={point} className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-primary" />
+                    <span className="text-sm text-foreground/90">{point}</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground">
-              Everything You Need in One Place
-            </h2>
-            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-              Discover powerful features designed to enhance your academic journey and campus experience
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-foreground">Top-level product modules</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              Landing now clearly introduces the platform architecture before students log in.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
                 viewport={{ once: true }}
               >
-                <Card className="h-full border-border/50 hover:border-primary/50 transition-colors">
+                <Card className="h-full border-border/70 bg-card/90 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                      <feature.icon className="w-6 h-6 text-primary" />
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <feature.icon className="h-6 w-6" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
+                    <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -228,46 +247,58 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground">
-              Loved by Students
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              See what our community has to say about CampusConnect
+      <section className="bg-muted/30 py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-foreground">How it works</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              A simple 3-step flow that makes the project story easy to explain in reviews and demos.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
+          <div className="grid gap-6 md:grid-cols-3">
+            {steps.map((step, index) => (
               <motion.div
-                key={index}
+                key={step.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
+                viewport={{ once: true }}
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+              >
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <step.icon className="h-5 w-5" />
+                </div>
+                <p className="mb-2 text-sm font-semibold text-primary">Step {index + 1}</p>
+                <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-foreground">Student experience outcomes</h2>
+            <p className="mt-4 text-muted-foreground">Focused on usability, speed, and visibility.</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {outcomes.map((outcome, index) => (
+              <motion.div
+                key={outcome.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
                 viewport={{ once: true }}
               >
-                <Card className="h-full border-border/50">
+                <Card className="h-full border-border bg-card">
                   <CardContent className="p-6">
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Trophy key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground mb-4">"{testimonial.quote}"</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="text-primary font-semibold">
-                          {testimonial.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{testimonial.name}</p>
-                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                      </div>
-                    </div>
+                    <outcome.icon className="mb-3 h-6 w-6 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">{outcome.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{outcome.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -276,50 +307,43 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-purple-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-20">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.45 }}
             viewport={{ once: true }}
+            className="rounded-3xl border border-primary/20 bg-gradient-to-r from-primary to-purple-600 px-8 py-12 shadow-2xl shadow-primary/20"
           >
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Ready to Transform Your Campus Experience?
-            </h2>
-            <p className="text-white/80 mb-8 text-lg">
-              Join thousands of students already using CampusConnect
+            <h2 className="text-3xl font-bold text-white">Ready to showcase your project with impact?</h2>
+            <p className="mt-4 text-lg text-white/85">
+              A strong landing + matching login builds first impression quality for demos and reviews.
             </p>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               variant="secondary"
-              className="h-12 px-8 text-base"
+              className="mt-8 h-12 rounded-full px-8 font-semibold"
               onClick={() => setLocation("/login")}
             >
-              Get Started Now
-              {/* <ArrowRight className="w-5 h-5 ml-2" /> */}
+              Continue to Login
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-card border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-6 h-6 text-primary" />
-              <span className="text-lg font-semibold">CampusConnect</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2026 CampusConnect. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
-            </div>
+      <footer className="border-t border-border bg-card py-10">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            <span className="text-lg font-semibold text-foreground">CampusConnect</span>
+          </div>
+          <p className="text-sm text-muted-foreground">© 2026 CampusConnect. All rights reserved.</p>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-primary">Privacy</a>
+            <a href="#" className="hover:text-primary">Terms</a>
+            <a href="#" className="hover:text-primary">Contact</a>
           </div>
         </div>
       </footer>
