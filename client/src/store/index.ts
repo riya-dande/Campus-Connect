@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { supabase } from "@/lib/supabaseClient";
 
 export interface Announcement {
   id: string;
@@ -70,16 +71,12 @@ export interface UserState {
   setActiveTab: (tab: 'announcements' | 'feed' | 'chats') => void;
   toggleLike: (postId: string) => void;
   markRead: (id: string) => void;
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
 // Demo credentials for testing
-const DEMO_CREDENTIALS = [
-  { email: 'alex@campus.edu', password: 'alex123', name: 'Alex Rivera' },
-  { email: 'student@campus.edu', password: 'student123', name: 'Jordan Smith' },
-  { email: 'demo@campus.edu', password: 'demo123', name: 'Demo User' },
-];
+// Removed demo credentials
 
 export const useStore = create<UserState>((set) => ({
   isAuthenticated: false,
@@ -266,40 +263,44 @@ export const useStore = create<UserState>((set) => ({
   markRead: (id) => set((state) => ({
     announcements: state.announcements.map(a => a.id === id ? { ...a, isRead: true } : a)
   })),
-  login: (email, password) => {
-    const credential = DEMO_CREDENTIALS.find(
-      c => c.email === email && c.password === password
-    );
-    if (credential) {
-      set({ 
-        isAuthenticated: true,
-        user: {
-          ...useStore.getState().user,
-          name: credential.name,
-          email: credential.email,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${credential.name.replace(' ', '')}`
-        }
-      });
-      return true;
+  login: async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      set({ isAuthenticated: false });
+      return false;
     }
-    return false;
+    // Fetch user profile from Supabase if needed
+    set({
+      isAuthenticated: true,
+      user: {
+        ...useStore.getState().user,
+        name: data.user.user_metadata?.name || data.user.email,
+        email: data.user.email,
+        avatar: data.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.email}`,
+        // ...other fields as needed
+      }
+    });
+    return true;
   },
-  logout: () => set({ 
-    isAuthenticated: false,
-    user: {
-      name: "",
-      email: "",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      major: "Computer Science",
-      year: "3rd Year",
-      cgpa: 3.8,
-      attendance: 92,
-      studyHours: 4.5,
-      mood: 75,
-      level: 12,
-      xp: 2450,
-      xpToNext: 550,
-      streak: 12,
-    }
-  })
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ 
+      isAuthenticated: false,
+      user: {
+        name: "",
+        email: "",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+        major: "Computer Science",
+        year: "3rd Year",
+        cgpa: 3.8,
+        attendance: 92,
+        studyHours: 4.5,
+        mood: 75,
+        level: 12,
+        xp: 2450,
+        xpToNext: 550,
+        streak: 12,
+      }
+    });
+  }
 }));

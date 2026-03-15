@@ -175,8 +175,9 @@ export default function CommunicationHub() {
                   onSubmit={async e => {
                     e.preventDefault();
                     if (!selectedChannel) return;
-                    // Replace with your user_id logic
-                    const user_id = "demo-user";
+                    // Get current/logged-in user id from Supabase auth
+                    const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : null;
+                    const user_id = user ? user.id : "94348ccb-0153-4a8c-b0db-d5b94045b4a4";
                     const input = e.target.elements[0].value;
                     if (!input.trim()) return;
                     setSending(true);
