@@ -35,9 +35,21 @@ interface Task {
 }
 
 export default function AcademicDashboard() {
+    // Calculate average attendance from grades array
+    const averageAttendance = Math.round(
+      grades.reduce((sum, g) => sum + g.attendance, 0) / grades.length
+    );
   const { user } = useStore();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskInput, setTaskInput] = useState("");
+  // Static AI tips for Academic Copilot
+  const aiTips = [
+    "Break study sessions into focused 25-minute blocks.",
+    "Summarize your notes after each class.",
+    "Use spaced repetition for better retention.",
+    "Set clear, achievable goals for each week.",
+    "Ask your AI Mentor for help with tough topics!"
+  ];
   const [category, setCategory] = useState(TASK_CATEGORIES[0]);
   const [loading, setLoading] = useState(false);
 

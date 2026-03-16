@@ -322,48 +322,6 @@ export default function Home() {
 
             <div className="space-y-6">
 
-              {/* CALENDAR */}
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarDays className="w-5 h-5 text-primary" />
-                    Calendar
-                  </CardTitle>
-
-                  <p className="text-sm text-muted-foreground">
-                    Your month at a glance
-                  </p>
-                </CardHeader>
-
-                <CardContent className="flex flex-col items-center">
-                  <div className="w-full max-w-[280px]">
-                    <DayPicker
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      showOutsideDays
-                      className="calendar-ui"
-                      modifiers={{
-                        event: eventDates
-                      }}
-                      modifiersClassNames={{
-                        event: "event-dot"
-                      }}
-                    />
-                  </div>
-                  {date && (
-                    <p className="text-sm text-muted-foreground mt-3">
-                      Selected: {date.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "2-digit",
-                        year: "numeric"
-                      })}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
 
 
               <CampusLifeHub />
