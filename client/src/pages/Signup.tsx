@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  CheckCircle2,
-  GraduationCap,
   Lock,
   Mail,
   User,
@@ -13,21 +11,133 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { supabase } from "@/lib/supabase";
+import { useStore } from "@/store";
+
+type University = { id: string; name: string; domain: string };
+type College = { id: string; university_id: string; college_name: string; domain: string };
+type Role = "university_admin" | "college_admin" | "student";
+type StaffRole = "management" | "dean" | "hod" | "faculty";
+type Department = "cse" | "eee" | "ece" | "it" | "etm" | "csd" | "csm";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [rollNo, setRollNo] = useState("");
+  const [year, setYear] = useState("");
+  const [empId, setEmpId] = useState("");
+  const [staffRole, setStaffRole] = useState<StaffRole>("faculty");
+  const [department, setDepartment] = useState<Department>("cse");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [role, setRole] = useState<Role>("student");
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [universityId, setUniversityId] = useState<string>("");
+  const [collegeId, setCollegeId] = useState<string>("");
+
+  useEffect(() => {
+    if (!supabase) return;
+    const loadData = async () => {
+      const { data: uniData } = await supabase.from("universities").select("id,name,domain");
+      const { data: colData } = await supabase.from("colleges").select("id,university_id,college_name,domain");
+      if (Array.isArray(uniData)) setUniversities(uniData);
+      if (Array.isArray(colData)) setColleges(colData);
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (!universityId && universities.length) {
+      setUniversityId(universities[0].id);
+    }
+  }, [universities, universityId]);
+
+  useEffect(() => {
+    const trimmed = fullName.trim();
+    if (trimmed) {
+      setUsername(trimmed);
+    }
+  }, [fullName]);
+
+  useEffect(() => {
+    if (role !== "student") return;
+    const emailLocal = email.split("@")[0]?.trim() ?? "";
+    if (!emailLocal) return;
+    setRollNo(emailLocal);
+  }, [email, role]);
+
+  useEffect(() => {
+    if (!universityId) return;
+    const firstCollege = colleges.find((c) => c.university_id === universityId);
+    if (firstCollege && !collegeId) {
+      setCollegeId(firstCollege.id);
+    }
+  }, [collegeId, colleges, universityId]);
+
+  const filteredColleges = useMemo(() => {
+    return colleges.filter((college) => !universityId || college.university_id === universityId);
+  }, [colleges, universityId]);
+
+  const expectedDomain = useMemo(() => {
+    const selectedUniversity = universities.find((u) => u.id === universityId);
+    const selectedCollege = colleges.find((c) => c.id === collegeId);
+    return role === "university_admin" ? selectedUniversity?.domain : selectedCollege?.domain;
+  }, [collegeId, colleges, role, universities, universityId]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const isStudent = role === "student";
+    const isStaff = role !== "student";
+    const emailLocal = email.split("@")[0]?.trim() ?? "";
+
+    const resolvedUsername = fullName.trim();
+    if (!resolvedUsername) {
+      setError("Full name is required.");
+      return;
+    }
+
+    if (isStudent) {
+      const resolvedRollNo = emailLocal;
+      if (!resolvedRollNo) {
+        setError("Roll number is required.");
+        return;
+      }
+      if (!year.trim()) {
+        setError("Year is required.");
+        return;
+      }
+    }
+
+    if (isStaff) {
+      if (!empId.trim()) {
+        setError("Employee ID is required.");
+        return;
+      }
+      if (!staffRole) {
+        setError("Staff role is required.");
+        return;
+      }
+      if (!department) {
+        setError("Department is required.");
+        return;
+      }
+    }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -38,15 +148,83 @@ export default function Signup() {
       return;
     }
 
+    const emailDomain = email.split("@")[1]?.toLowerCase();
+    const selectedUniversity = universities.find((u) => u.id === universityId);
+    const selectedCollege = colleges.find((c) => c.id === collegeId);
+
+    if (role === "university_admin" && !selectedUniversity) {
+      setError("Please select your university.");
+      return;
+    }
+    if (role !== "university_admin" && !selectedCollege) {
+      setError("Please select your college.");
+      return;
+    }
+
+    const expectedDomain =
+      role === "university_admin"
+        ? selectedUniversity?.domain
+        : selectedCollege?.domain;
+
+    if (!emailDomain || !expectedDomain || emailDomain !== expectedDomain.toLowerCase()) {
+      setError(`Email domain must match ${expectedDomain ?? "your institute"} domain.`);
+      return;
+    }
+
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsLoading(false);
+
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        name: fullName,
+        username: resolvedUsername,
+        role,
+        universityId: universityId || null,
+        collegeId: collegeId || null,
+        rollNo: isStudent ? emailLocal : null,
+        year: isStudent ? year.trim() : null,
+        empId: isStaff ? empId.trim() : null,
+        staffRole: isStaff ? staffRole : null,
+        department: isStaff ? department : null,
+      }),
+    });
+
+    let payload: any = null;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      setIsLoading(false);
+      setError(payload?.message ?? "Signup failed. Please try again.");
+      return;
+    }
 
     toast({
-      title: "Account created (UI Demo)",
-      description: "Signup screen is ready. Connect backend API to persist users.",
+      title: "Account created",
+      description: "Signup successful. Signing you in...",
     });
-    setLocation("/login");
+
+    setIsLoading(false);
+
+    const loginResult = await login(email, password);
+    if (loginResult.success) {
+      const nextRole = loginResult.role ?? role;
+      if (nextRole === "university_admin") {
+        setLocation("/dashboard/university-admin");
+      } else if (nextRole === "college_admin") {
+        setLocation("/dashboard/college-admin");
+      } else {
+        setLocation("/dashboard/student");
+      }
+    } else {
+      setLocation("/login");
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -71,46 +249,7 @@ export default function Signup() {
         />
       </div>
 
-      <div className="mx-auto grid min-h-screen max-w-7xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <motion.section
-          initial={{ opacity: 0, x: -18 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="hidden lg:block"
-        >
-          <div className="rounded-3xl border border-border/70 bg-slate-950 p-8 text-white shadow-2xl shadow-primary/20">
-            <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-purple-600">
-                <GraduationCap className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <p className="text-xl font-bold">CampusConnect</p>
-                <p className="text-sm text-white/70">Create your student account</p>
-              </div>
-            </div>
-
-            <h1 className="max-w-lg text-4xl font-bold leading-tight">
-              Sign up once. Unlock your full campus ecosystem.
-            </h1>
-            <p className="mt-4 max-w-xl text-white/75">
-              Built for student identity, collaboration, and progress tracking with a clean purple-first style.
-            </p>
-
-            <div className="mt-8 space-y-3">
-              {[
-                "Join your department and year community",
-                "Track academics and discover campus events",
-                "Get one identity across all CampusConnect modules",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-white/90">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.section>
-
+      <div className="mx-auto flex min-h-screen max-w-3xl items-center px-4 py-8 sm:px-6 lg:px-8">
         <motion.section
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -147,7 +286,7 @@ export default function Signup() {
                 </div>
               </div>
 
-              <form onSubmit={handleSignup} className="space-y-4">
+              <form onSubmit={handleSignup} className="space-y-5">
                 <div>
                   <label htmlFor="name" className="mb-2 block text-sm font-medium">
                     Full Name
@@ -166,56 +305,233 @@ export default function Signup() {
                 </div>
 
                 <div>
+                  <label htmlFor="username" className="mb-2 block text-sm font-medium">
+                    Username (from display name)
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      placeholder="Auto from full name"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="h-12 rounded-xl pl-12"
+                      readOnly
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    This comes from the display name in Supabase Auth.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium">
+                      Role
+                    </label>
+                    <Select value={role} onValueChange={(value) => setRole(value as Role)}>
+                      <SelectTrigger className="h-12 rounded-xl">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="university_admin">University Admin</SelectItem>
+                        <SelectItem value="college_admin">College Admin</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Pick the dashboard you need access to.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium">
+                      University
+                    </label>
+                    <Select value={universityId} onValueChange={setUniversityId}>
+                      <SelectTrigger className="h-12 rounded-xl">
+                        <SelectValue placeholder={universities.length ? "Select university" : "No universities found"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {universities.map((uni) => (
+                          <SelectItem key={uni.id} value={uni.id}>
+                            {uni.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {role !== "university_admin" && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium">
+                      College
+                    </label>
+                    <Select value={collegeId} onValueChange={setCollegeId}>
+                      <SelectTrigger className="h-12 rounded-xl">
+                        <SelectValue placeholder={filteredColleges.length ? "Select college" : "No colleges found"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredColleges.map((college) => (
+                          <SelectItem key={college.id} value={college.id}>
+                            {college.college_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {role === "student" && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="rollno" className="mb-2 block text-sm font-medium">
+                        Roll Number
+                      </label>
+                      <Input
+                        id="rollno"
+                        placeholder="23xxxxx"
+                        value={rollNo}
+                        onChange={(e) => setRollNo(e.target.value)}
+                        className="h-12 rounded-xl"
+                        readOnly
+                      />
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Auto-filled from email (before @).
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">
+                        Year
+                      </label>
+                      <Select value={year} onValueChange={setYear}>
+                        <SelectTrigger className="h-12 rounded-xl">
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1st Year">1st Year</SelectItem>
+                          <SelectItem value="2nd Year">2nd Year</SelectItem>
+                          <SelectItem value="3rd Year">3rd Year</SelectItem>
+                          <SelectItem value="4th Year">4th Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {role !== "student" && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label htmlFor="empid" className="mb-2 block text-sm font-medium">
+                        Employee ID
+                      </label>
+                      <Input
+                        id="empid"
+                        placeholder="EMP-1023"
+                        value={empId}
+                        onChange={(e) => setEmpId(e.target.value)}
+                        className="h-12 rounded-xl"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">
+                        Staff Role
+                      </label>
+                      <Select value={staffRole} onValueChange={(value) => setStaffRole(value as StaffRole)}>
+                        <SelectTrigger className="h-12 rounded-xl">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="management">Management</SelectItem>
+                          <SelectItem value="dean">Dean</SelectItem>
+                          <SelectItem value="hod">HOD</SelectItem>
+                          <SelectItem value="faculty">Faculty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">
+                        Department
+                      </label>
+                      <Select value={department} onValueChange={(value) => setDepartment(value as Department)}>
+                        <SelectTrigger className="h-12 rounded-xl">
+                          <SelectValue placeholder="Select dept" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cse">CSE</SelectItem>
+                          <SelectItem value="eee">EEE</SelectItem>
+                          <SelectItem value="ece">ECE</SelectItem>
+                          <SelectItem value="it">IT</SelectItem>
+                          <SelectItem value="etm">ETM</SelectItem>
+                          <SelectItem value="csd">CSD</SelectItem>
+                          <SelectItem value="csm">CSM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                <div>
                   <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                    College Email
+                    Institute Email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="you@campus.edu"
+                      placeholder="rollno@college.edu"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="h-12 rounded-xl pl-12"
                       required
                     />
                   </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {expectedDomain ? `Required domain: ${expectedDomain}` : "Select a university/college to see the required domain."}
+                  </p>
                 </div>
 
-                <div>
-                  <label htmlFor="password" className="mb-2 block text-sm font-medium">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="At least 6 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 rounded-xl pl-12"
-                      required
-                    />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="password" className="mb-2 block text-sm font-medium">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="At least 6 characters"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-12 rounded-xl pl-12"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <label htmlFor="confirm-password" className="mb-2 block text-sm font-medium">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="Re-enter password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="h-12 rounded-xl pl-12"
-                      required
-                    />
+                  <div>
+                    <label htmlFor="confirm-password" className="mb-2 block text-sm font-medium">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        placeholder="Re-enter password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="h-12 rounded-xl pl-12"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 

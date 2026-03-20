@@ -9,6 +9,8 @@ import { communicationRouter } from "./modules/communication/communication.route
 import { profileRouter } from "./modules/profile/profile.routes";
 import { eventsRouter } from "./modules/events/events.routes";
 import { aiRouter } from "./modules/ai/ai.routes";
+import { tasksRouter } from "./modules/tasks/tasks.routes";
+import { chatRouter } from "./modules/chat/chat.routes";
 import { mentorReply } from "./services/ai.service";
 
 export async function registerRoutes(server: Server, app: Express): Promise<Server> {
@@ -26,14 +28,17 @@ export async function registerRoutes(server: Server, app: Express): Promise<Serv
   api.use("/profile", profileRouter);
   api.use("/events", eventsRouter);
   api.use("/ai", aiRouter);
+  api.use("/tasks", tasksRouter);
+  api.use("/chat", chatRouter);
 
   // Backward compatibility with existing frontend chatbot endpoint
-  api.post("/mentor/chat", (req, res) => {
+  api.post("/mentor/chat", async (req, res) => {
     const { message } = req.body as { message?: string };
     if (!message) {
       return res.status(400).json({ message: "message is required" });
     }
-    return res.json({ reply: mentorReply(message) });
+    const reply = await mentorReply(message);
+    return res.json({ reply });
   });
 
   app.use("/api", api);

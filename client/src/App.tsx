@@ -9,6 +9,9 @@ import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
+import StudentDashboard from "@/pages/StudentDashboard";
+import CollegeAdminDashboard from "@/pages/CollegeAdminDashboard";
+import UniversityAdminDashboard from "@/pages/UniversityAdminDashboard";
 import Hub from "@/pages/Hub";
 import CampusZones from "@/pages/CampusZones";
 import Profile from "@/pages/Profile";
@@ -27,7 +30,7 @@ function ProtectedPage({ component: Component }: { component: React.ComponentTyp
 }
 
 function Router() {
-  const { isAuthenticated } = useStore();
+  const { isAuthenticated, user } = useStore();
   
   return (
     <Switch>
@@ -40,7 +43,29 @@ function Router() {
       
       {/* Protected routes - redirect to login if not authenticated */}
       <Route path="/dashboard">
-        {isAuthenticated ? <ProtectedPage component={Home} /> : <Login />}
+        {isAuthenticated ? (
+          user.role === "university_admin" ? (
+            <ProtectedPage component={UniversityAdminDashboard} />
+          ) : user.role === "college_admin" ? (
+            <ProtectedPage component={CollegeAdminDashboard} />
+          ) : (
+            <ProtectedPage component={Home} />
+          )
+        ) : (
+          <Login />
+        )}
+      </Route>
+
+      <Route path="/dashboard/student">
+        {isAuthenticated ? <ProtectedPage component={StudentDashboard} /> : <Login />}
+      </Route>
+
+      <Route path="/dashboard/college-admin">
+        {isAuthenticated ? <ProtectedPage component={CollegeAdminDashboard} /> : <Login />}
+      </Route>
+
+      <Route path="/dashboard/university-admin">
+        {isAuthenticated ? <ProtectedPage component={UniversityAdminDashboard} /> : <Login />}
       </Route>
       
       <Route path="/hub">

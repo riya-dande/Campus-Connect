@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -21,37 +21,18 @@ import {
   Video,
 } from "lucide-react";
 import { useStore } from "@/store";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
-
-const TASK_CATEGORIES = ["Academic", "Club", "Career"];
-
-// Fix: Add Task type for tasks state
-interface Task {
-  id: string;
-  title: string;
-  category: string;
-  completed: boolean;
-}
+import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function AcademicDashboard() {
-    // Calculate average attendance from grades array
-    const averageAttendance = Math.round(
-      grades.reduce((sum, g) => sum + g.attendance, 0) / grades.length
-    );
   const { user } = useStore();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [taskInput, setTaskInput] = useState("");
-  // Static AI tips for Academic Copilot
-  const aiTips = [
-    "Break study sessions into focused 25-minute blocks.",
-    "Summarize your notes after each class.",
-    "Use spaced repetition for better retention.",
-    "Set clear, achievable goals for each week.",
-    "Ask your AI Mentor for help with tough topics!"
-  ];
-  const [category, setCategory] = useState(TASK_CATEGORIES[0]);
-  const [loading, setLoading] = useState(false);
 
   const grades = [
     { subject: "Operating Systems", grade: "A-", progress: 85, attendance: 92 },
@@ -66,55 +47,76 @@ export default function AcademicDashboard() {
     { title: "Algo Quiz 3", due: "Dec 10", status: "completed", priority: "low" },
   ];
 
-  const schedule = [
-    { time: "9:00 AM", subject: "Operating Systems", room: "CS-101", type: "lecture" },
-    { time: "11:00 AM", subject: "Data Structures Lab", room: "Lab-203", type: "lab" },
-    { time: "2:00 PM", subject: "Algorithms", room: "CS-102", type: "lecture" },
+  const classRoutine = [
+    { day: "Monday", slot: "09:00-10:00", room: "LH-3", subject: "Automata and Compiler Design", faculty: "126BW" },
+    { day: "Monday", slot: "10:00-11:00", room: "LH-3", subject: "Managerial Economics and Financial Analysis", faculty: "126EG" },
+    { day: "Tuesday", slot: "10:00-11:00", room: "LH-3", subject: "Computer Vision and Pattern Recognition", faculty: "126DR" },
+    { day: "Tuesday", slot: "02:00-03:00", room: "LH-3", subject: "Introduction to Data Analytics", faculty: "126KJ" },
+    { day: "Wednesday", slot: "01:00-03:00", room: "CL-4", subject: "Mini Project-2", faculty: "12644" },
+  ];
+  const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayLabels: Record<string, string> = {
+    Monday: "Mon",
+    Tuesday: "Tue",
+    Wednesday: "Wed",
+    Thursday: "Thu",
+    Friday: "Fri",
+    Saturday: "Sat",
+  };
+  const [focusDay, setFocusDay] = useState<string>("All");
+
+  const timeSlots = useMemo(() => {
+    const slots = Array.from(new Set(classRoutine.map((row) => row.slot)));
+    const toMinutes = (slot: string) => {
+      const [start] = slot.split("-");
+      const [h, m] = start.split(":").map(Number);
+      return h * 60 + m;
+    };
+    return slots.sort((a, b) => toMinutes(a) - toMinutes(b));
+  }, [classRoutine]);
+
+  const routineMap = useMemo(() => {
+    const map: Record<string, Record<string, typeof classRoutine>> = {};
+    for (const row of classRoutine) {
+      if (!map[row.day]) map[row.day] = {};
+      if (!map[row.day][row.slot]) map[row.day][row.slot] = [];
+      map[row.day][row.slot].push(row);
+    }
+    return map;
+  }, [classRoutine]);
+
+  const examTimeTable = [
+    { subject: "126EG - Managerial Economics and Financial Analysis", date: "2026-02-02", start: "10:00", end: "12:00" },
+    { subject: "126BW - Automata and Compiler Design", date: "2026-02-03", start: "10:00", end: "12:00" },
+    { subject: "126DR - Computer Vision and Pattern Recognition", date: "2026-02-04", start: "10:00", end: "12:00" },
+    { subject: "126EQ - Agile Methodology", date: "2026-02-05", start: "10:00", end: "12:00" },
+    { subject: "126DH - Soft Computing", date: "2026-02-05", start: "02:00", end: "04:00" },
   ];
 
-  // Load tasks from Supabase
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("id, title, category, completed")
-        .order("created_at", { ascending: false });
-      if (!error && data) setTasks((data as Task[]) || []);
-      setLoading(false);
-    };
-    fetchTasks();
-  }, []);
+  const examResults = [
+    { subject: "Automata and Compiler Design", mid1: 20, mid2: 18, assign1: 9, assign2: 10, ppt: 8, lab: 18, total: 83 },
+    { subject: "Computer Vision and Pattern Recognition", mid1: 18, mid2: 19, assign1: 9, assign2: 9, ppt: 9, lab: 19, total: 83 },
+    { subject: "Managerial Economics and Financial Analysis", mid1: 17, mid2: 18, assign1: 8, assign2: 9, ppt: 8, lab: 17, total: 77 },
+    { subject: "Introduction to Data Analytics", mid1: 16, mid2: 17, assign1: 8, assign2: 8, ppt: 7, lab: 16, total: 72 },
+  ];
 
-  // Add new task
-  const handleAddTask = async () => {
-    if (!taskInput.trim()) return;
-    await supabase
-      .from("tasks")
-      .insert([{ title: taskInput, category, completed: false }]);
-    setTaskInput("");
-    setCategory(TASK_CATEGORIES[0]);
-    // Reload tasks
-    const { data } = await supabase
-      .from("tasks")
-      .select("id, title, category, completed")
-      .order("created_at", { ascending: false });
-    setTasks((data as Task[]) || []);
-  };
+  const attendanceSummary = [
+    { subject: "Automata and Compiler Design", held: 39, attend: 30 },
+    { subject: "Computer Vision and Pattern Recognition", held: 45, attend: 38 },
+    { subject: "Managerial Economics and Financial Analysis", held: 34, attend: 29 },
+    { subject: "Mini Project-2", held: 42, attend: 36 },
+  ];
 
-  // Toggle complete
-  const handleToggleTask = async (id: string, completed: boolean) => {
-    await supabase
-      .from("tasks")
-      .update({ completed: !completed })
-      .eq("id", id);
-    // Reload tasks
-    const { data } = await supabase
-      .from("tasks")
-      .select("id, title, category, completed")
-      .order("created_at", { ascending: false });
-    setTasks((data as Task[]) || []);
-  };
+  const averageAttendance = useMemo(() => {
+    const held = attendanceSummary.reduce((sum, row) => sum + row.held, 0);
+    const attend = attendanceSummary.reduce((sum, row) => sum + row.attend, 0);
+    return Math.round((attend / held) * 1000) / 10;
+  }, [attendanceSummary]);
+
+  const aiTips = [
+    "Two low-attendance subjects detected. Attend next 3 classes to stay above 85%.",
+    "Your next exam gap is 1 day. Prioritize Automata and CVPR revision today.",
+  ];
 
   return (
     <div className="space-y-6">
@@ -250,26 +252,88 @@ export default function AcademicDashboard() {
 
         <TabsContent value="class-routine">
           <Card className="border border-border/50">
-            <CardHeader><CardTitle className="text-lg">Weekly Class Routine</CardTitle></CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Day</TableHead><TableHead>Time</TableHead><TableHead>Room</TableHead><TableHead>Subject</TableHead><TableHead>Faculty Code</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classRoutine.map((row) => (
-                    <TableRow key={`${row.day}-${row.slot}-${row.subject}`}>
-                      <TableCell className="font-medium">{row.day}</TableCell>
-                      <TableCell>{row.slot}</TableCell>
-                      <TableCell>{row.room}</TableCell>
-                      <TableCell>{row.subject}</TableCell>
-                      <TableCell>{row.faculty}</TableCell>
-                    </TableRow>
+            <CardHeader className="space-y-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="text-lg">Weekly Class Timetable</CardTitle>
+                  <p className="text-sm text-muted-foreground">Tap a day to focus the timetable.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant={focusDay === "All" ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => setFocusDay("All")}
+                  >
+                    Week
+                  </Button>
+                  {weekDays.map((day) => (
+                    <Button
+                      key={day}
+                      size="sm"
+                      variant={focusDay === day ? "default" : "outline"}
+                      className="rounded-full"
+                      onClick={() => setFocusDay(day)}
+                    >
+                      {dayLabels[day]}
+                    </Button>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="overflow-x-auto">
+                <div className="min-w-[860px] rounded-2xl border border-border/60 bg-card">
+                  <div className="grid grid-cols-[120px_repeat(6,minmax(140px,1fr))] border-b border-border/60 text-[11px] uppercase text-muted-foreground">
+                    <div className="p-3 font-semibold">Time</div>
+                    {weekDays.map((day) => (
+                      <div
+                        key={day}
+                        className={cn(
+                          "p-3 font-semibold",
+                          focusDay !== "All" && focusDay !== day && "opacity-50",
+                          focusDay === day && "text-foreground"
+                        )}
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="divide-y divide-border/60">
+                    {timeSlots.map((slot) => (
+                      <div key={slot} className="grid grid-cols-[120px_repeat(6,minmax(140px,1fr))]">
+                        <div className="p-3 text-xs font-semibold text-muted-foreground bg-muted/20">{slot}</div>
+                        {weekDays.map((day) => {
+                          const entries = routineMap[day]?.[slot] ?? [];
+                          const dim = focusDay !== "All" && focusDay !== day;
+                          return (
+                            <div key={`${day}-${slot}`} className={cn("p-2", dim && "opacity-40")}>
+                              {entries.length ? (
+                                <div className="space-y-2">
+                                  {entries.map((entry) => (
+                                    <div
+                                      key={`${entry.subject}-${entry.room}-${entry.faculty}`}
+                                      className="rounded-xl border border-border/70 bg-background p-2 shadow-sm"
+                                    >
+                                      <p className="text-xs font-semibold leading-snug">{entry.subject}</p>
+                                      <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
+                                        <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{entry.room}</span>
+                                        <span className="rounded-full bg-muted px-2 py-0.5">#{entry.faculty}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="h-full min-h-[56px] rounded-xl border border-dashed border-border/60 bg-muted/10" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

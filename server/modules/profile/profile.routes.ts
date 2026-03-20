@@ -1,11 +1,17 @@
 import { Router } from "express";
-import { achievements, hostelInfo, internships, studentProfile } from "../../data/mockDb";
+import {
+  getAchievements,
+  getHostelInfo,
+  getInternships,
+  getStudentProfile,
+} from "../../services/data.service";
 
 export const profileRouter = Router();
 
-profileRouter.get("/details", (_req, res) => {
+profileRouter.get("/details", async (_req, res) => {
+  const [profile, hostelInfo] = await Promise.all([getStudentProfile(), getHostelInfo()]);
   res.json({
-    profile: studentProfile,
+    profile,
     erp: {
       faculty: "Bachelor Of Technology",
       batch: "Engineering 2023-2027",
@@ -25,10 +31,12 @@ profileRouter.get("/details", (_req, res) => {
   });
 });
 
-profileRouter.get("/achievements", (_req, res) => {
+profileRouter.get("/achievements", async (_req, res) => {
+  const achievements = await getAchievements();
   res.json({ achievements });
 });
 
-profileRouter.get("/internships", (_req, res) => {
+profileRouter.get("/internships", async (_req, res) => {
+  const internships = await getInternships();
   res.json({ internships });
 });

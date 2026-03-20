@@ -8,15 +8,13 @@ import {
   EyeOff,
   GraduationCap,
   Lock,
-  Mail,
-  Zap,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -28,7 +26,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isHoveringDemo, setIsHoveringDemo] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +33,19 @@ export default function Login() {
     setIsLoading(true);
 
     await new Promise((resolve) => setTimeout(resolve, 700));
-    const success = login(email, password);
+    const result = await login(email, password);
 
-    if (success) {
-      setLocation("/dashboard");
+    if (result.success) {
+      const role = result.role ?? "student";
+      if (role === "university_admin") {
+        setLocation("/dashboard/university-admin");
+      } else if (role === "college_admin") {
+        setLocation("/dashboard/college-admin");
+      } else {
+        setLocation("/dashboard/student");
+      }
     } else {
-      setError("Invalid email or password. Try: alex@campus.edu / alex123");
+      setError(result.error ?? "Invalid email or password. If you just signed up, confirm your email first.");
     }
 
     setIsLoading(false);
@@ -54,10 +58,6 @@ export default function Login() {
     });
   };
 
-  const fillDemoCredentials = () => {
-    setEmail("alex@campus.edu");
-    setPassword("alex123");
-  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -84,8 +84,11 @@ export default function Login() {
           <Card className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/10">
             <div className="h-1.5 bg-gradient-to-r from-primary to-purple-600" />
             <CardHeader className="pb-4 pt-7 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <GraduationCap className="h-6 w-6" />
+              </div>
               <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-              <CardDescription>Login with Google or your credentials</CardDescription>
+              <CardDescription>Sign in with your campus credentials</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-5 px-7 pb-8">
@@ -114,20 +117,23 @@ export default function Login() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                    Email Address
+                    Roll Number / Username / Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="email"
-                      type="email"
-                      placeholder="you@campus.edu"
+                      type="text"
+                      placeholder="23xxxxx"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="h-12 rounded-xl pl-12"
                       required
                     />
                   </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    You can use roll number, staff username, or full email.
+                  </p>
                 </div>
 
                 <div>
@@ -157,9 +163,12 @@ export default function Login() {
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    {error}
+                  <div className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+                    <AlertCircle className="mt-0.5 h-4 w-4" />
+                    <div>
+                      <p className="font-medium">Login failed</p>
+                      <p className="text-xs text-destructive/90">{error}</p>
+                    </div>
                   </div>
                 )}
 
@@ -174,17 +183,7 @@ export default function Login() {
                   Login
                 </Button>
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-11 w-full justify-start rounded-xl text-muted-foreground hover:text-primary"
-                  onClick={fillDemoCredentials}
-                  onMouseEnter={() => setIsHoveringDemo(true)}
-                  onMouseLeave={() => setIsHoveringDemo(false)}
-                >
-                  <Zap className={cn("mr-2 h-4 w-4", isHoveringDemo && "text-yellow-500")} />
-                  Fill Demo Credentials
-                </Button>
+                
               </form>
 
               <p className="text-center text-sm text-muted-foreground">

@@ -22,7 +22,29 @@ function toIsoDate(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
-export default function CampusLifeHub() {
+type TaskItem = {
+  id: string;
+  text: string;
+  done: boolean;
+  type: string;
+  date: string;
+  time: string;
+};
+
+type CampusLifeHubProps = {
+  tasks?: TaskItem[];
+};
+
+function formatTime(time: string) {
+  if (!time) return "All day";
+  const [h, m] = time.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return time;
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = ((h + 11) % 12) + 1;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+export default function CampusLifeHub({ tasks = [] }: CampusLifeHubProps) {
   const [viewDate, setViewDate] = useState(new Date());
   const today = new Date();
   const todayIso = toIsoDate(today);
@@ -54,22 +76,37 @@ export default function CampusLifeHub() {
     };
   }, [viewDate]);
 
+  const taskEvents = useMemo(() => {
+    return tasks.map((task) => ({
+      id: `task-${task.id}`,
+      title: task.text,
+      date: task.date,
+      time: formatTime(task.time),
+      venue: "Task",
+      type: task.type || "Task",
+    }));
+  }, [tasks]);
+
+  const allEvents = useMemo(() => {
+    return [...calendarEvents, ...taskEvents];
+  }, [taskEvents]);
+
   const monthEvents = useMemo(() => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    return calendarEvents.filter((event) => {
+    return allEvents.filter((event) => {
       const d = new Date(event.date);
       return d.getFullYear() === year && d.getMonth() === month;
     });
-  }, [viewDate]);
+  }, [allEvents, viewDate]);
 
   const eventMap = useMemo(() => {
     const map = new Map<string, number>();
-    for (const event of calendarEvents) {
+    for (const event of allEvents) {
       map.set(event.date, (map.get(event.date) ?? 0) + 1);
     }
     return map;
-  }, []);
+  }, [allEvents]);
 
   return (
     <div className="space-y-4">

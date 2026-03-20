@@ -20,6 +20,7 @@ import {
   Image,
   MessageCircle,
   MoreHorizontal,
+  Newspaper,
   PartyPopper,
   Plus,
   Search,
@@ -329,8 +330,9 @@ export default function Hub() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <div className="space-y-6 lg:col-span-3">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {[
+              { key: "feed", label: "Feed", icon: Newspaper, color: "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30" },
               { key: "network", label: "Connect", icon: Users, color: "text-blue-600 bg-blue-100 dark:bg-blue-900/30" },
               { key: "clubs", label: "Groups", icon: Group, color: "text-green-600 bg-green-100 dark:bg-green-900/30" },
               { key: "clubs", label: "Club Corner", icon: PartyPopper, color: "text-purple-600 bg-purple-100 dark:bg-purple-900/30" },
@@ -352,15 +354,8 @@ export default function Hub() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4 grid w-full grid-cols-4">
-              <TabsTrigger value="feed">Feed</TabsTrigger>
-              <TabsTrigger value="network">Network</TabsTrigger>
-              <TabsTrigger value="chats">Chats</TabsTrigger>
-              <TabsTrigger value="clubs">Club Corner</TabsTrigger>
-            </TabsList>
-
             <TabsContent value="feed" className="space-y-4">
-              <Card>
+              <Card className="!rounded-none border-border/60 !bg-white shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex gap-3">
                     <Avatar className="h-10 w-10">
@@ -405,7 +400,7 @@ export default function Hub() {
 
               {filteredFeed.map((post) => (
                 <motion.div key={post.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card>
+                  <Card className="!rounded-none border-border/60 !bg-white shadow-sm">
                     <CardContent className="p-4">
                       <div className="mb-3 flex items-start justify-between">
                         <div className="flex gap-3">

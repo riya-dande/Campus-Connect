@@ -202,6 +202,8 @@ const quickReplies = [
   "Events",
   "Library",
   "Timetable",
+  "Study track",
+  "Results",
   "Help"
 ];
 
@@ -370,7 +372,12 @@ export default function MentorWidget() {
                       color: msg.isUser ? "white" : "#1e293b",
                       fontSize: "14px",
                       lineHeight: "1.4",
-                      wordBreak: "break-word"
+                      wordBreak: "break-word",
+                      whiteSpace: msg.text.startsWith("Class Timetable") ? "pre" : "pre-wrap",
+                      overflowX: msg.text.startsWith("Class Timetable") ? "auto" : "visible",
+                      fontFamily: msg.text.startsWith("Class Timetable")
+                        ? "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+                        : "inherit"
                     }}
                   >
                     {msg.text}

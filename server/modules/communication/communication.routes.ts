@@ -1,12 +1,14 @@
 import { Router } from "express";
-import { chatThreads, counsellors } from "../../data/mockDb";
+import { getChatThreads, getCounsellors } from "../../services/data.service";
 
 export const communicationRouter = Router();
 
-communicationRouter.get("/chats", (_req, res) => {
-  res.json({ chats: chatThreads });
+communicationRouter.get("/chats", async (_req, res) => {
+  const chats = await getChatThreads();
+  res.json({ chats });
 });
 
-communicationRouter.get("/counsellors", (_req, res) => {
+communicationRouter.get("/counsellors", async (_req, res) => {
+  const counsellors = await getCounsellors();
   res.json({ counsellors });
 });

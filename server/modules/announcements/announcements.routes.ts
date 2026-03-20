@@ -1,17 +1,17 @@
 import { Router } from "express";
-import { announcements } from "../../data/mockDb";
+import { getAnnouncements, markAnnouncementRead } from "../../services/data.service";
 
 export const announcementsRouter = Router();
 
-announcementsRouter.get("/", (_req, res) => {
+announcementsRouter.get("/", async (_req, res) => {
+  const announcements = await getAnnouncements();
   res.json({ announcements });
 });
 
-announcementsRouter.patch("/:id/read", (req, res) => {
-  const announcement = announcements.find((item) => item.id === req.params.id);
+announcementsRouter.patch("/:id/read", async (req, res) => {
+  const announcement = await markAnnouncementRead(req.params.id);
   if (!announcement) {
     return res.status(404).json({ message: "announcement not found" });
   }
-  announcement.isRead = true;
   return res.json({ announcement });
 });
